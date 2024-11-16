@@ -26,6 +26,79 @@ Input includes:
 > A cryptogrpah signature proviing ownership of the output being spent.
 
 - OUTPU:
-Outputs specify
+Outputs specify where the coins are going. Each output includes:
+> The recipient's address(public key).
+> The amount of value (e.g., coins) being transferred.
+> A coindition or script that must be satisfied to spend this output.
+
+We can treat the input(s) & output(s) as a ledger of payments.
+Inputs are the sources of funds and Outputs are the destinations of funds.
+
+Relationship Between Blockchain and Transactions.
+
+The blockchain is a distributed ledger that orgnizes all transactions into blocks.
+Each block:
+- groups a batch of transactions.
+- endures the integrity of those transactions by hashing and linking the block to the previous block.
+
+(* i think this is useful *)
+Transactions form the backbone of the blockchain's purpose: recording the transfer of assets or values in a secure and immutable manner.
+
+
+(**) And here are few things to append here, that is (**):
+(1) Users create transactions to transfer coins - exchange
+(2) Miners/validators collect transactions into blocks and validate them - mining & validating & provide <storage resources & computing resources>
+(3) The block is added to the blockchain, making the transactions part of the ledger.
+todo: maybe I can expand this to the physical layer's Node's concept.
+
+
+Here I got a question and trying to explain it:
+That is we already know there are Users, Miners or Validators exists in the blockchain, and they play different roles and provide different operaitons in the blockchain.
+So, in which scenario who provide the physical layer's resources like the Node ?
+We know that Blocks are stored on the Nodes of the block chain, and Nodes are more physical layer's concept.
+
+> Anyone can add a node:
+>> (A) In a public blockchain, any user can set up a node or a minder node by downloading the blockchain software,
+configuring it, and joining the network. There is no central authority controlling node membershp.
+>> (B) In a private blockchain,(e.g. hyperledger, Quorum) it is controlled by adminisrators or organizaitons, in such environment, node management is centralized. Administrators define who can join as a node and what role each node plays.
+>> (C) Consortium Blockchains(e.g., Corda, Ripple), this managed by a group of stakeholders, and they have some pre-defined rules.
+
+## How may kinds of nodes are there ?
+A node is any device (computer, server, mobile phone) connected to the blockchain network. It runs the blockchain software and participates in the network by :
+>> storing data (part or all of the blockchain)
+>> validating transactions and blocks
+>> propagating information to other nodes(transactions, blocks, or consensus messages)
+(a) Full Node: this stores a complete copy of the blockchain ledger and enforces all the rules of the protocol,
+---> like: Bitcoin Core node, Ethereum full node;
+
+(b) Light Node(SPV Node): this stores only parts of the blockchain data, typically the block headers,
+---> like: Wallet apps that uses Simplified Payment Verfications(SPV) in Bitcoins.
+
+(c) Miner/Validator Node: specialized nodes that participate in the consensus mechanism by validating and proposing new blocks.
+---> like: Ethereum validator, Bitcoin miner.
+
+(d) Archive Node: a full  node that stores all historical states of the blockchain(not just the current state)
+---> Ethereum archive node .
+
+## How many kinds of valdiations are there in different layers of blockchain ?
+
+
+Maybe we can divide into different perspecitve by roles?
+> Suppose a Minder want to mine blockcoins on a bunch of blocks, what validaitons he/she needs todo ?
+> And what validations & calculations does a validator needs to do ?
+> And what a user need to validate during the process of he/she trying to purchasing a coin in the blockchain?
+*/
+
+pub struct Output {
+    pub to_addr: Address,
+    pub value: u64,
+}
+
+/*
 
 */
+impl Hashtable for Output {
+    fn bytes(&self) -> Vec<u8> {
+        let mut bytes: Vec<u8> = vec![];
+    }
+}
