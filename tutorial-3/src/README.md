@@ -1,7 +1,8 @@
 # Blockchain in Rust 
 
-This repo is based from [Blockchain-Rust](https://github.com/GeekLaunch/blockchain-rust/), I refine the implementations and add more logs and comments based on that. 
+This repository is based on [Blockchain-Rust](https://github.com/GeekLaunch/blockchain-rust/). I've done a little job in my repo, like refined the existing implementations by adding more detailed logs and comments. Additionally, I've made an attempt to implement smart contracts within this repository.
 
+What I appreciate most about this project are the clear and simple definitions and explanations provided in the tutorial series. They have been extermely helpful in giving me a quick and thorough understanding of blockchain concepts, as well as their definitions and implementations using Rust. 
 
 
 ## Tutorial Github Repo
