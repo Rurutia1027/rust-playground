@@ -92,7 +92,7 @@ pub fn u128_bytes(u: &u128) -> [u8; 16] {
 }
 
 // declare block, blockchain, hashtable and transacitons as modules in the scope of the project
-mod block;
-mod blockchain;
-mod hashtable;
-mod transactions;
+pub mod block;
+pub mod blockchain;
+pub mod hashtable;
+pub mod transactions;
