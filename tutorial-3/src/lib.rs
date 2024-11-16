@@ -70,7 +70,7 @@ pub fn u64_bytes(u: &u64) -> [u8; 8] {
 Function converted unsigned integer with 128 bits into array with length 16
 and with type unsigned integer with 8 bits.
 */
-pub fn u128_bytes(u: &u64) -> [u8; 16] {
+pub fn u128_bytes(u: &u128) -> [u8; 16] {
     [
         (u >> 8 * 0x0) as u8,
         (u >> 8 * 0x1) as u8,
