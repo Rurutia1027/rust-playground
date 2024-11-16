@@ -172,9 +172,28 @@ impl Hashtable for Transaction {
         // here we iterate each element:Output that stores in vector of input: Vec<Output>
         // and invoke each element:Output's hash bytes function to get its bytes vector
         // and then append the vectors to bytes: Vec<u8>
+        bytes.extend(
+            self.inputs
+                .iter()
+                .flat_map(|item| item.bytes())
+                .collect::<Vec<u8>>(),
+        );
 
         // here we iterate each element:Output that stores in vector of output: Vec<Output>
         // and invoke each element:Output's hash bytes function to get its bytes vector
         // and then append the vectors to bytes: Vec<u8>
+
+        bytes.extend(
+            self.outputs
+                .iter()
+                // we use flat_map here, because in iteration
+                // one item may be converted into multiple Vec<u8> items, we cannot only handle the
+                // first element, so we need to use flat_map to retrive all of them
+                .flat_map(|item| item.bytes())
+                .collect::<Vec<u8>>(),
+        );
+
+        // return bytes of both input bytes value and output bytes value
+        bytes
     }
 }
