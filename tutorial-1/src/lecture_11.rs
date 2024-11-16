@@ -34,4 +34,42 @@
 // some danger things happen in the program
 // and i thing this must be the Rust's safety guarantee's implementation which let Rust more secure than C/C++'s pointer rules.
 
-fn main() {}
+use std::vec;
+
+fn main() {
+    let mut vec_1 = vec![4, 5, 6];
+
+    // here we create two mutable reference -- which will be prevent by the compiler
+    let ref_1 = &mut vec_1;
+
+    // this will result in data race which compiler will not you to do so
+    // println!("ref1: {:?}, ref2: {:?}", ref_1, ref_2);
+
+    // here we create two immutable reference-- immutable refrence only allow you
+    // get access to the values of the data but you cannot use the reference to do any modificaitons
+    // that directly affect the original data stored on heap
+
+    // and multiple immutable referens creation is always allowed in Rust
+    let ref_3 = &vec_1;
+    let ref_4 = &vec_1;
+    let ref_2 = &mut vec_1;
+    println!("ref_3: {:?}, ref_4: {:?}, ref_2: {:?}", ref_3, ref_4, ref_2);
+
+    // here is another thing we need to notice, that is we can either
+    // 1. create a series of immutable references
+    // or
+    // 2. only one mutable reference at the same time
+
+    // here we try the other conditon: make sure the reference should always be valid
+
+    // in the ide we can see warnnings of the compiler
+    // this is because the block holds the ownershp of the vec_3 which stores in the heap
+    // but when get out of the scope of the block the block's ownership comes to the end
+    // , and vec_3 will be deleted and released the space allocated on heap will be invalid
+    // and let refrence vec_2 pointed to an invalid space is not allowed in Rust.
+    // this is the Dangling reference
+    let vec_2 = {
+        let vec_3 = vec![1, 2, 3];
+        &vec_3
+    };
+}
