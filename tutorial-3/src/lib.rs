@@ -33,7 +33,6 @@ converted into the unsigned integer with 8 bits and stored inside the vector.
 0x0 is hexadecimal value 0, 0x1 is hexadecimal value 1, 0x2 is hexadecimal value 2, 0x3 is hexadecimal value 3.
 
 
-
 suppose u is value of 32 bits long,
 11111111 -- [0, 7]     --> this can be retrieved by u >> (8 * 0 <0x0>) = 0 (means discard non bits)        -> (11111111) -> converted into u8 -> vec[0]
 00000000 -- [8, 15]    --> this can be retrieved by u >> (8 * 1 <0x1>) = 8 (means discard lowest 8 bits)   -> (00000000) | (11111111) -> (00000000) -> converted into u8 -> vec[1]
@@ -92,6 +91,7 @@ pub fn u128_bytes(u: &u128) -> [u8; 16] {
 }
 
 // declare block, blockchain, hashtable and transacitons as modules in the scope of the project
+// we set those mods to public in order to let them available in the scope of tests/
 pub mod block;
 pub mod blockchain;
 pub mod hashtable;
