@@ -3,4 +3,13 @@ name = "tutorial-2"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "distributed_system"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tutorial-1"
+path = "src/main.rs"
+
+
 [dependencies]
