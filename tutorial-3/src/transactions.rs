@@ -1,6 +1,9 @@
 use std::collections::HashSet;
 
-use crate::{hashtable, u64_bytes, Address, Block, Hashtable};
+use crate::{
+    hashtable, u64_bytes, Address, Block,
+    Hashtable,
+};
 
 /*
 In a blockchain, a transaction represents a record of a state change, typically a transfer of value (liek cryptocurrency or tokens).
@@ -90,15 +93,88 @@ Maybe we can divide into different perspecitve by roles?
 */
 
 pub struct Output {
+    // operator's address
     pub to_addr: Address,
+
+    // spending/receiving actual coin value
     pub value: u64,
 }
 
 /*
-
+Implement trait `Hashtable` and implement its inner function :bytes.
+In it's bytes function we create a vector of u8 and convert all variables defined
+in struct Output into Vec<u8> append to the bytes vector.
 */
 impl Hashtable for Output {
     fn bytes(&self) -> Vec<u8> {
         let mut bytes: Vec<u8> = vec![];
+        bytes.extend(&self.to_addr.bytes());
+        // here covnerted self#value from u64 into len = 8's Vec<u8> vector
+        bytes.extend(&u64_bytes(&self.value));
+
+        bytes
+    }
+}
+
+/*
+Define Transaction
+*/
+
+pub struct Transaction {
+    pub inputs: Vec<Output>,
+    pub outputs: Vec<Output>,
+}
+
+/*
+Add functions associated with struct Transaction
+fun1: input_value: accumulate each input item's value together, to calculate total spending value in current Transaction.
+fun2: output_value: accumuate each output item's value together, to calculate total receiving value in current Transaction.
+fun3: input_hashes: traverse each Output item that stores in vector of Vec<Output>, and get its hash value append to HashSet
+fun4: output_hashes: traverse each Output item that stores in vector of Vec<Output>, and get its hash value append to HashSet
+*/
+impl Transaction {
+    pub fn input_value(&self) -> u64 {
+        self.inputs
+            .iter()
+            .map(|input| input.value)
+            .sum()
+    }
+
+    pub fn output_value(&self) -> u64 {
+        self.outputs
+            .iter()
+            .map(|output| output.value)
+            .sum()
+    }
+
+    pub fn input_hashes(&self) -> HashSet<Hash> {
+        self.inputs
+            .iter()
+            .map(|input| input.hash())
+            .collect::<HashSet<Hash>>()
+    }
+
+    pub fn output_hashes(&self) -> HashSet<Hash> {
+        self.outputs
+            .iter()
+            .map(|output| output.hash())
+            .collect::<HashSet<Hash>>()
+    }
+}
+
+/*
+Let Transaction implement trait of Hashtable and implement its inner declared method: bytes(...)
+*/
+impl Hashtable for Transaction {
+    fn bytes(&self) -> Vec<u8> {
+        let mut bytes: Vec<u8> = vec![];
+
+        // here we iterate each element:Output that stores in vector of input: Vec<Output>
+        // and invoke each element:Output's hash bytes function to get its bytes vector
+        // and then append the vectors to bytes: Vec<u8>
+
+        // here we iterate each element:Output that stores in vector of output: Vec<Output>
+        // and invoke each element:Output's hash bytes function to get its bytes vector
+        // and then append the vectors to bytes: Vec<u8>
     }
 }
