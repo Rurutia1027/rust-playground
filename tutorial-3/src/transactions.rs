@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
 use crate::{
-    hashtable, u64_bytes, Address, Block,
-    Hashtable,
+    block::Block, hashtable::Hashtable,
+    u64_bytes, Address, Hash,
 };
 
 /*
@@ -108,7 +108,7 @@ in struct Output into Vec<u8> append to the bytes vector.
 impl Hashtable for Output {
     fn bytes(&self) -> Vec<u8> {
         let mut bytes: Vec<u8> = vec![];
-        bytes.extend(&self.to_addr.bytes());
+        bytes.extend(self.to_addr.bytes());
         // here covnerted self#value from u64 into len = 8's Vec<u8> vector
         bytes.extend(&u64_bytes(&self.value));
 
