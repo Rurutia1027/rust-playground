@@ -1,62 +1,37 @@
-// Function's Ownership
+// Borrowing in Rust
+// In previous lecture, the lecturer introduced the ownership feature usage and how to use it
+// expecially for Vec those kind of objects in the scenario of insider function and outside funciton
+// passing and receiving instances.
+// however, if we need to passing variables to function, and do some modifications in the scope of the function
+// and then let the return instance has affected by the modification logic, we often do not use ownership
+// instead there is a better solution for that scenario, that is the Borrowing
 
-fn main() {
-    let vec_1 = vec![1, 2, 3];
+// what's borrowing ? it means establishing a reference to some data
+// it works like a pointer in C/C++, but it does not take the ownership of the data or instance(which stores in the heap space)
+// which means the modificaitons in the function scope will affect the data we passing
+// and when we exit the scope of the funciton,the ownership still remains in the scope of the context(actually it does hand over at the begin)
+// so when exit the scope of the invoke scope, the heap space of the data will not be released or deleted.
+// and it can still be available in current context.
 
-    // here is the feature of Rust when we pass the vec_1 to the function take_ownershp
-    // the ownership will be handed over to the take_ownership from current context
-    // and there are no return values from the funciton, and after executing the function's
-    // inner all variables will be dropped, and result in the vec_1's value or the space in the heap is released
-    // and simply speaking the ownership handed over to the function and not renturn so after calling the fucntion
-    // return to current context the vec_1's ownership not belong to current context anymore and its value already not available for current context
-    // that's why it cannot be get access to in current context function
-    // -- take_ownership(vec_1);
-    // -- println!("vec 1 is: {:?}", vec_1);
+// the lecturer gives the question that is why we use borrowing/
+// one is because sometimes we just need do handle the modification logic to the function scope
+// we need to use the value when context switch from function back to current context -- there is no need to hand over the ownership from current context to the function
 
-    // but wait a minute, if we pass an instance clone to the
-    // function of take_ownership instead, it means that we handing the clone ownership to the function
-    // the original one's ownership still remains in current context
-    // this will not affect current context's vec_1's later invocation
+// and the seconde is we just do not want apply for extra space (which clone does)
+// we just create another reference the same as the context one but in the scope of funciton context
+// and let it point to the same heap space for the data/instance which is passed to the fucntion as a parameter.
 
-    // well this is a little bit different from the address passing and refrence passing concept in the c or c++ scope
-    // the concept of ownership helps me better understand its working strategy
-    // but, it seems that in c++/c we passing a reference to the function, the refrences pointed to value's modificaiton
-    // will not affect invoker's outsider's condition, and the instance that the reference points to can still work
-    // maybe this ownership strategy can totally avoid memory leak in case the vec_1 this 'pointer' points to a invalid heap space
-    // in the coming logic
-    take_ownership(&vec_1);
-    println!("vec_1's content is {:?}", vec_1);
+// lecture also give us two rules to follow if we want to use the reference
+// one is: at any time, you can either one mutable reference or any number of immmutable references
+//      --  i think this is mainly avoid two mutable reference may cause dirty data generation or two modificaiton not synchronize caused data not consistent
+// the other is: reference must always be valid:
+//      -- i think this must be the refernce works like a pointer, and it must points to a valid space which is allocate on the heap.
+//      -- otherwise an invalid reference try to get access data may cause memory leak
 
-    let vec_2 = gives_ownership();
-    println!("vec_2 is {:?}", vec_2);
+// simply speaking one is solve out 'Data race' -- which two references both want to do modificaitons upon one value,
+// the order of the modification may cause error
+//'Dangling refrence' this should be the reference trying to get access to an already released heap space will result in
+// some danger things happen in the program
+// and i thing this must be the Rust's safety guarantee's implementation which let Rust more secure than C/C++'s pointer rules.
 
-    let mut vec_3: Vec<u32> = vec![1, 2, 3, 3, 4];
-    takes_and_gives_ownership(&mut vec_3);
-    println!("vec_3: {:?}", vec_3);
-
-    let x = 19;
-    stack_function(x);
-    // when we try to passing Rust inner defined basic types like integer, char, float or other basic values
-    // to the funciton we find that the ownership strategies do not work here,
-    // this is because the Rust it treates every basic type as clone operation when developer wants to passing them as parameters to the function
-    // clone operation is executed, so the operation in the scope of the function is execute upon the clone instance othe outer scoped isntance value will not be affected.
-    println!("in main x value is {x}");
-}
-
-fn take_ownership(vec: &Vec<u32>) {
-    println!("vec_1 clone's content is : {:?}", vec);
-}
-
-fn gives_ownership() -> Vec<i32> {
-    vec![4, 5, 6]
-}
-
-// add &mut Vec<u32> here if we do modification in the scope of the function
-// then the modificaitoin will updated to the parameters of vec
-fn takes_and_gives_ownership(vec: &mut Vec<u32>) {
-    &vec.push(99);
-}
-
-fn stack_function(mut var: i32) {
-    var = 56;
-}
+fn main() {}
