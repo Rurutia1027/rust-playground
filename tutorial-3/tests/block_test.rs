@@ -1,8 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use blockchain::{
-        block::Block, hashtable::Hashtable, now,
-    };
+    use blockchain::{block::Block, hashtable::Hashtable, now};
     use crypto_hash::hex_digest;
     use hex;
 
@@ -15,13 +13,8 @@ mod tests {
 
     #[test]
     fn test_block_creation() {
-        let block = Block::new(
-            13,
-            0,
-            vec![0; 32],
-            0,
-            gen_difficulty(),
-        );
+        let block =
+            Block::new(13, 0, vec![0; 32], 0, gen_difficulty());
         assert_eq!(block.index, 13);
         assert_eq!(block.timestamp, 0);
         assert_eq!(block.hash, vec![0; 32]);
@@ -29,13 +22,8 @@ mod tests {
 
     #[test]
     fn test_block_bytes() {
-        let block = Block::new(
-            1,
-            1627836483,
-            vec![0; 32],
-            12345,
-            2,
-        );
+        let block =
+            Block::new(1, 1627836483, vec![0; 32], 12345, 2);
         let bytes = block.bytes();
 
         // bytes is converted from
@@ -44,10 +32,7 @@ mod tests {
         // prev_block_hash: vec![0; 32] -> Vec<u8> * 32
         // nonce: u64 -> Vec<u8> * 8
         // difficulty: u128 -> Vec<u8> * 16
-        assert_eq!(
-            bytes.len(),
-            4 + 16 + 32 + 8 + 16
-        );
+        assert_eq!(bytes.len(), 4 + 16 + 32 + 8 + 16);
 
         // use cargo test -- --nocapture to let println info print to console
         println!("Block inner info {:?}", block);
@@ -60,23 +45,11 @@ mod tests {
     #[test]
     fn test_block_hash() {
         // first, create a new Block
-        let block = Block::new(
-            22,
-            now(),
-            vec![0; 32],
-            12344,
-            3,
-        );
+        let block = Block::new(22, now(), vec![0; 32], 12344, 3);
         let bytes = block.bytes();
-        assert_eq!(
-            bytes.len(),
-            4 + 16 + 32 + 8 + 16
-        );
+        assert_eq!(bytes.len(), 4 + 16 + 32 + 8 + 16);
         let hash_val = block.hash();
-        println!(
-            "hash value of the block is {:?}",
-            hash_val
-        );
+        println!("hash value of the block is {:?}", hash_val);
 
         // and let's convert the Vec<u8> into hex
         println!(
@@ -84,4 +57,20 @@ mod tests {
             hex::encode(hash_val)
         )
     }
+
+    fn gen_random_output() -> Output {
+        
+    }
+
+    fn gen_random_outputs(cnt: u8)
+
+    fn gen_random_transaction() {}
+
+    fn gen_random_transactions(cnt: u8) {
+
+    }
+
+    // todo: here add more test cases for block's transactions here
+    #[test]
+    fn test_trans_in_block() {}
 }

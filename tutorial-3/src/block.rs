@@ -4,13 +4,18 @@ Definition of the Blocks.
 
 use std::fmt::{self, Debug, Formatter};
 
-use crate::{hashtable::Hashtable, u128_bytes, u32_bytes, u64_bytes, Hash};
+use crate::{
+    hashtable::Hashtable,
+    transactions::{self, Transaction},
+    u128_bytes, u32_bytes, u64_bytes, Hash,
+};
 
 pub struct Block {
     pub index: u32,
     pub timestamp: u128,
     pub hash: Hash,
     pub prev_block_hash: Hash,
+    pub transactions: Vec<Transaction>,
     pub nonce: u64,
     pub difficulty: u128,
 }
@@ -23,10 +28,11 @@ impl Debug for Block {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(
             f,
-            "Block[{}]: {} at: {}, nonce: {}, difficulty: {}",
+            "Block[{}]: {} at: {}, trans cnt: {}, nonce: {}, difficulty: {}",
             &self.index,
             hex::encode(&self.hash),
             &self.timestamp,
+            &self.transactions.len(),
             &self.nonce,
             &self.difficulty
         )
@@ -48,6 +54,7 @@ impl Block {
         index: u32,
         timestamp: u128,
         prev_block_hash: Hash,
+        transactions: Vec<Transaction>,
         nonce: u64,
         difficulty: u128,
     ) -> Self {
@@ -58,6 +65,7 @@ impl Block {
             // Block's init hash value is an empty array with type u8 and with length 32
             hash: vec![0; 32],
             prev_block_hash,
+            transactions,
             nonce,
             difficulty,
         }
@@ -65,12 +73,16 @@ impl Block {
 
     /*
     Function mine is trying to mimic the process of mining a block-coin from the blockchain
-
     */
     pub fn mine(&mut self) {
-        for nonce_attempt in 0..(u64::max_value()) {
-            self.nonce = nonce_attempt;
-        }
+        todo!("add more details after we finish the transaction logic in Block")
+    }
+
+    pub fn trans_hash(&mut self) -> Vec<u8> {
+        self.transactions
+            .iter()
+            .flat_map(|item| item.hash())
+            .collect::<Vec<u8>>()
     }
 }
 
@@ -109,8 +121,15 @@ impl Hashtable for Block {
         // fourth, continue append Block's nonce value to the bytes array
         bytes.extend(&u64_bytes(&self.nonce));
 
-        // todo: [Transactions Here !!!] we also need to consider the transaction here, which transaction will be add in
-        // other commit
+        // fifth, iterate current block's transaction vector
+        // and extract each item's bytes append to the bytes
+        // (and this bytes will feed hash function as to be hashed data)
+        bytes.extend(
+            self.transactions
+                .iter()
+                .flat_map(|item| item.bytes())
+                .collect::<Vec<u8>>(),
+        );
 
         // last, we append the inner difficulty
         // todo: [Can seder help us ???] and I need to leave a question here: convert all the items into bytes is the process of serialize
