@@ -1,3 +1,5 @@
+// Structs and its Types
+
 fn main() {
-    println!("Hello World Tutorial-1");
+    println!("Hello World");
 }
