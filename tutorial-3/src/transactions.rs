@@ -119,7 +119,6 @@ impl Hashtable for Output {
 /*
 Define Transaction
 */
-
 pub struct Transaction {
     pub inputs: Vec<Output>,
     pub outputs: Vec<Output>,
@@ -159,6 +158,23 @@ impl Transaction {
             .iter()
             .map(|output| output.hash())
             .collect::<HashSet<Hash>>()
+    }
+    /*
+      Notes for coinbase in blockchain.
+      A coinbase transaction is a special type of transaction in a blockchain system, typically the first transaction in each block.
+      The purpose of coinbase is to reward the miner(or validator) of the block with newly created coins and possibly include transaction fees.
+
+      - Coinbase transactions: with its inputs(spending) empty, this introduces new coins to the system(and the new coins are the reward of the miner).
+            - inputs: None
+            - outputs: transfers the newly minted coins to the miner's address.
+
+      - Regular transactions: with both non-empty inputs(spending) and outputs(receiving),
+            - inputs: spends outputs from previous transactions.
+            - outputs: transfers the value to new addres.
+
+    */
+    pub fn is_coinbase(&self) -> bool {
+        self.inputs.len() == 0
     }
 }
 
