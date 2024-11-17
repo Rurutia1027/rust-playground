@@ -63,6 +63,8 @@ Once a miner successfully creates or validates a block:
 - The reward and fee are assigned to the miner's address. 
 
 ### Step-3: Block Added to Blockchain 
-
+* The block becomes part of the immutable blockchian.
+* The miner's reward (from the coinbase transaction) is recorded in the blockchain and associated with their address(!! here !! we know that Full Nodes in the blockchain provides the responsibility storing metadata and this reward, coin's ownership is belong to the metadata). 
 
 ### Step-4: Process Repeats
+* The miner moves on to the next block in the blockchain. 
