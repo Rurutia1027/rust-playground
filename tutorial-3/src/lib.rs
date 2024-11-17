@@ -10,9 +10,11 @@ This function will first retrieve current timestamp in seconds and milliseconds,
 and then convert both of the values into the unsigned integer that with 128 bits.
 */
 pub fn now() -> u128 {
-    let duration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let duration =
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 
-    duration.as_secs() as u128 * 1000 + duration.subsec_millis() as u128
+    duration.as_secs() as u128 * 1000
+        + duration.subsec_millis() as u128
 }
 
 /*
