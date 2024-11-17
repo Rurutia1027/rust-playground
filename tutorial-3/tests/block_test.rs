@@ -1,6 +1,12 @@
 #[cfg(test)]
 mod tests {
-    use blockchain::{block::Block, hashtable::Hashtable, now};
+    use anyhow::{anyhow, Ok, Result};
+    use blockchain::{
+        block::Block,
+        hashtable::Hashtable,
+        now,
+        transactions::{Output, Transaction},
+    };
     use crypto_hash::hex_digest;
     use hex;
 
@@ -13,8 +19,16 @@ mod tests {
 
     #[test]
     fn test_block_creation() {
-        let block =
-            Block::new(13, 0, vec![0; 32], 0, gen_difficulty());
+        // first, we need to init a series of transaction
+        let trans = gen_random_transactions(9).unwrap();
+        let block = Block::new(
+            13,
+            0,
+            vec![0; 32],
+            trans,
+            0,
+            gen_difficulty(),
+        );
         assert_eq!(block.index, 13);
         assert_eq!(block.timestamp, 0);
         assert_eq!(block.hash, vec![0; 32]);
@@ -22,8 +36,16 @@ mod tests {
 
     #[test]
     fn test_block_bytes() {
-        let block =
-            Block::new(1, 1627836483, vec![0; 32], 12345, 2);
+        let trans: Vec<Transaction> =
+            gen_random_transactions(10).unwrap();
+        let block = Block::new(
+            1,
+            1627836483,
+            vec![0; 32],
+            trans,
+            12345,
+            2,
+        );
         let bytes = block.bytes();
 
         // bytes is converted from
@@ -44,8 +66,12 @@ mod tests {
     */
     #[test]
     fn test_block_hash() {
+        // first first, create a Transaction vector
+        let trans: Vec<Transaction> =
+            gen_random_transactions(10).unwrap();
         // first, create a new Block
-        let block = Block::new(22, now(), vec![0; 32], 12344, 3);
+        let block =
+            Block::new(22, now(), vec![0; 32], trans, 1234, 3);
         let bytes = block.bytes();
         assert_eq!(bytes.len(), 4 + 16 + 32 + 8 + 16);
         let hash_val = block.hash();
@@ -58,16 +84,28 @@ mod tests {
         )
     }
 
-    fn gen_random_output() -> Output {
-        
+    fn gen_random_output() -> Result<Output> {
+        Ok(Output {
+            to_addr: String::new(),
+            value: 0,
+        })
     }
 
-    fn gen_random_outputs(cnt: u8)
+    fn gen_random_outputs(cnt: u8) -> Result<Vec<Output>> {
+        Ok(vec![])
+    }
 
-    fn gen_random_transaction() {}
+    fn gen_random_transaction() -> Result<Transaction> {
+        Ok(Transaction {
+            inputs: vec![],
+            outputs: vec![],
+        })
+    }
 
-    fn gen_random_transactions(cnt: u8) {
-
+    fn gen_random_transactions(
+        cnt: u8,
+    ) -> Result<Vec<Transaction>> {
+        Ok(vec![])
     }
 
     // todo: here add more test cases for block's transactions here
