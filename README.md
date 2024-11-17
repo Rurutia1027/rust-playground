@@ -63,7 +63,23 @@ Contributions are welcome! Feel free to fork the repository, make your changes, 
 ---
 
 ## 📚 Resources
+### Blockchain References
+- [Bitcoin Transaction Rules](https://en.bitcoin.it/wiki/Protocol_rules#tx_messages): Learn about the protocol rules for Bitcoin transactions.
+- [Coinbase Transaction](https://bitcoin.org/en/glossary/coinbase): A glossary entry explaining the concept of a Coinbase transaction.
+- [How is a transaction’s output signed?](https://bitcoin.stackexchange.com/q/45693): Explanation of transaction output signing in Bitcoin.
+- [What is a double-spend?](https://bitcoin.stackexchange.com/q/4974): An introduction to the concept of double-spending in blockchain.
 
+### Tutorial Resources
+- [Blockchain-Rust GitHub Repository](https://github.com/GeekLaunch/blockchain-rust/): The original tutorial repository for implementing blockchain in Rust.
+- Tutorial Videos:
+  1. [Build a cryptocurrency! - Blockchain in Rust #01: Blocks & Hashing](https://www.youtube.com/watch?v=vJdT05zl6jk)
+  2. [Making Magic Internet Money? - Blockchain In Rust #02: Mining](https://www.youtube.com/watch?v=PZGlYa-6U5U)
+  3. [BlockCHAINs and Verification tests - Blockchain In Rust #03: Chains & Checks](https://www.youtube.com/watch?v=buYvuIPdwHU)
+  4. [Adding Transactions to the Blockchain: Concepts - Blockchain in Rust #04: Transactions 1](https://youtu.be/-k1Yk9D_lU4?si=6Q7c71jlAEC1vz0e)
+  5. [Adding Transactions to the Blockchain: Implementation - Blockchain In Rust #05: Transactions 2](https://youtu.be/1t4TXnB4Qj4?si=St1OkysJemWqdUzF)
+
+### Rust Programming Course
+- [Rust Programming Course: From Beginner to Expert 2.0 (Udemy)](https://www.udemy.com/share/1062Ck/): A comprehensive Rust course for all levels.
 
 ## 📄 License
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
