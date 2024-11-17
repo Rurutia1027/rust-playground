@@ -1,0 +1,42 @@
+name: Rust Playground CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build and Test All Tutorials
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Build and Test tutorial-1
+        working-directory: ./tutorial-1
+        run: |
+          cargo build --verbose
+          cargo test --verbose -- --nocapture
+
+      - name: Build and Test tutorial-2
+        working-directory: ./tutorial-2
+        run: |
+          cargo build --verbose
+          cargo test --verbose -- --nocapture
+
+      - name: Build and Test tutorial-3
+        working-directory: ./tutorial-3
+        run: |
+          cargo build --verbose
+          cargo test --verbose -- --nocapture
