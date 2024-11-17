@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::fmt::{self, Debug, Formatter};
 
 use crate::{
     block::Block, hashtable::Hashtable,
@@ -100,6 +101,15 @@ pub struct Output {
     pub value: u64,
 }
 
+impl Output {
+    pub fn new(
+        to_addr: String,
+        value: u64,
+    ) -> Self {
+        Output { to_addr, value }
+    }
+}
+
 /*
 Implement trait `Hashtable` and implement its inner function :bytes.
 In it's bytes function we create a vector of u8 and convert all variables defined
@@ -132,6 +142,17 @@ fun3: input_hashes: traverse each Output item that stores in vector of Vec<Outpu
 fun4: output_hashes: traverse each Output item that stores in vector of Vec<Output>, and get its hash value append to HashSet
 */
 impl Transaction {
+    /**
+     * here we provide an implementaion of creating a new instance of the Transaction struct.
+     * refering to the implemnetaiton of the new function that defined in the Block.
+     */
+    pub fn new(
+        inputs: Vec<Output>,
+        outputs: Vec<Output>,
+    ) -> Self {
+        Transaction { inputs, outputs }
+    }
+
     pub fn input_value(&self) -> u64 {
         self.inputs
             .iter()
@@ -175,6 +196,50 @@ impl Transaction {
     */
     pub fn is_coinbase(&self) -> bool {
         self.inputs.len() == 0
+    }
+
+    pub fn is_validate(&self) -> bool {
+        // todo: add more validation details here to verify
+        // 1. whether this transaction is validated
+        // 2. whether the inputs and outputs in the scope fo the transaction will be
+        //    ready to be calcuated as expeted.
+        true
+    }
+
+    pub fn input_total_value(&self) -> u64 {
+        self.inputs
+            .iter()
+            .map(|item| item.value)
+            .sum()
+    }
+
+    pub fn output_total_value(&self) -> u64 {
+        self.outputs
+            .iter()
+            .map(|item| item.value)
+            .sum()
+    }
+}
+
+/*
+Let Transaction implement trait of Debug and add more inner details to the function of fmt.
+*/
+impl Debug for Transaction {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter,
+    ) -> fmt::Result {
+        write!(
+            f,
+            "Transaction[{:?}]: is_coinbase: {:?}, is_validate: {}, input_len: {}, output_len: {}, input_total_value: {}, output_total_value: {}",
+            hex::encode(&self.hash()),
+            &self.is_coinbase(),
+            &self.is_validate(),
+            &self.inputs.len(),
+            &self.outputs.len(),
+            &self.input_total_value(),
+            &self.output_total_value()
+        )
     }
 }
 
