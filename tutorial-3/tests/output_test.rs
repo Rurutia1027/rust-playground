@@ -42,9 +42,31 @@ mod tests {
         assert_eq!(bytes, output.bytes());
     }
 
+    // in this test we create instance of output
+    // and create bytes based on the inner variables of the instance of output
+    // and adopt Hashtable's hash function converted it into hex value
+    // and compare the outside hex hash value compare with the
+    // output's inner function return hash value and they should match with each other
     #[test]
-    fn test_output_hash() {}
+    fn test_output_hash_verify() {
+        let output = Output::new(
+            "193.33.12.34".to_owned(),
+            400,
+        );
+        // first, append all variables to current mutable byte array
+        let mut bytes = vec![];
+        bytes.extend(output.to_addr.bytes());
+        bytes.extend(&u64_bytes(&output.value));
+        assert_eq!(bytes, output.bytes());
 
-    #[test]
-    fn test_output_hash_hex() {}
+        // second, convert the byte array into hash by invoking the hash funciton which
+        // is already implemented in trait of Hashtable
+        let hash_value = crypto_hash::digest(
+            crypto_hash::Algorithm::SHA256,
+            &bytes,
+        );
+
+        // third, assert those values equal to each other
+        assert_eq!(hash_value, output.hash());
+    }
 }
