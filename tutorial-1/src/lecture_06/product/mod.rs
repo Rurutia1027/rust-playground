@@ -1,6 +1,8 @@
 // here we can use use category::Category; to shrink the code's representaiton
 // use category::Category;
 pub use category::Category;
+
+#[derive(PartialEq, Debug)]
 pub struct Product {
     id: u64,
     name: String,
