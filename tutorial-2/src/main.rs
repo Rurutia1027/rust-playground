@@ -1,6 +1,6 @@
 use std::io::StdoutLock;
 
-use anyhow::Context;
+use anyhow::{bail, Context};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -25,9 +25,12 @@ struct Body {
 #[serde(rename = "snake_case")]
 enum Payload {
     Echo { echo: String },
+    EchoOk { echo: String },
 }
 
-struct EchoNode;
+struct EchoNode {
+    id: usize,
+}
 
 impl EchoNode {
     pub fn step(
@@ -35,6 +38,28 @@ impl EchoNode {
         input: Message,
         output: &mut serde_json::Serializer<StdoutLock>,
     ) -> anyhow::Result<()> {
+        match input.body.payload {
+            Payload::Echo { echo } => {
+                let reply: Message = Message {
+                    src: input.dst,
+                    dst: input.src,
+
+                    body: Body {
+                        id: Some(self.id),
+                        in_reply_to: input.body.id,
+                        payload: Payload::EchoOk { echo },
+                    },
+                };
+
+                reply.serialize(output)
+
+                self.id += 1;
+            }
+            Payload::EchoOk { echo } => {
+                println!("receive echo ok, and echo node will do nothing in this case")
+            }
+        }
+
         Ok(())
     }
 }
@@ -44,6 +69,15 @@ fn main() -> anyhow::Result<()> {
     // let the inner state machine only deal with the messages in and out and not deal with the i/o's input stream and output stream
     let stdin = std::io::stdin().lock();
     let stdout = std::io::stdout().lock();
+
+    let mut output = serde_json::Serializer::new(stdout); 
+
+    // instance of EchoNode 
+    let mut state = EchoNode {
+        id: 0,
+    };
+
+
 
     // we want to add a wraper surrounding the inputstream(stdin)
     // and converted the coming streaming into the types that statisfy the definition of the message
@@ -57,6 +91,7 @@ fn main() -> anyhow::Result<()> {
     for input in inputs {
         // here we add an anyhow::context function to resolve if the input data stream cannot be deserialized into the Message this situation
         let input = input.context("Maelstrom input from STDIN could not be deserialized")?;
+        state.step(input, &mut output).context("Node step function failed")?; 
     }
 
     Ok(())
