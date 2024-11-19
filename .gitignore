@@ -4,3 +4,4 @@
 Cargo.lock
 **/src/main
 **/src/Cargo.lock
+/store 

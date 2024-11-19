@@ -51,7 +51,7 @@ impl EchoNode {
                     },
                 };
 
-                reply.serialize(output)
+                reply.serialize(output);
 
                 self.id += 1;
             }
@@ -70,14 +70,10 @@ fn main() -> anyhow::Result<()> {
     let stdin = std::io::stdin().lock();
     let stdout = std::io::stdout().lock();
 
-    let mut output = serde_json::Serializer::new(stdout); 
+    let mut output = serde_json::Serializer::new(stdout);
 
-    // instance of EchoNode 
-    let mut state = EchoNode {
-        id: 0,
-    };
-
-
+    // instance of EchoNode
+    let mut state = EchoNode { id: 0 };
 
     // we want to add a wraper surrounding the inputstream(stdin)
     // and converted the coming streaming into the types that statisfy the definition of the message
@@ -91,7 +87,9 @@ fn main() -> anyhow::Result<()> {
     for input in inputs {
         // here we add an anyhow::context function to resolve if the input data stream cannot be deserialized into the Message this situation
         let input = input.context("Maelstrom input from STDIN could not be deserialized")?;
-        state.step(input, &mut output).context("Node step function failed")?; 
+        state
+            .step(input, &mut output)
+            .context("Node step function failed")?;
     }
 
     Ok(())
