@@ -9,11 +9,11 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "echo"
-path = "src/echo/main.rs"
+path = "src/echo/echo.rs"
 
 [[bin]]
 name = "unique_id"
-path = "src/unique_id/main.rs"
+path = "src/unique_id/uid.rs"
 
 [[bin]]
 name = "broadcast"

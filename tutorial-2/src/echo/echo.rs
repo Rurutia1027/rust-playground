@@ -1,49 +1,16 @@
-use anyhow::{bail, Context, Result};
-use serde::{Deserialize, Serialize};
+use anyhow::{bail, Context};
+use dist::{main_loop, Body, Message, Node, Payload};
 use std::io::{StdoutLock, Write};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Message {
-    pub src: String,
-    #[serde(rename = "dest")]
-    pub dst: String,
-    pub body: Body,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Body {
-    #[serde(rename = "msg_id")]
-    id: Option<usize>,
-    in_reply_to: Option<usize>,
-    #[serde(flatten)]
-    payload: Payload,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum Payload {
-    Echo {
-        echo: String,
-    },
-    EchoOk {
-        echo: String,
-    },
-    Init {
-        node_id: String,
-        node_ids: Vec<String>,
-    },
-    InitOk,
-}
 
 pub struct EchoNode {
     pub id: usize,
 }
 
-impl EchoNode {
-    pub fn step(
+impl Node<Payload> for EchoNode {
+    fn step(
         // EchoNode's inner state may change according what kind of the message it receives
         &mut self,
-        input: Message,
+        input: Message<Payload>,
         output: &mut StdoutLock,
     ) -> anyhow::Result<()> {
         // here we use enum pattern matching to decide
@@ -71,9 +38,7 @@ impl EchoNode {
                 serde_json::to_writer(&mut *output, &reply)
                     .context("Serialize response to init")?;
                 // append a new line character
-                output
-                    .write_all(b"\n")
-                    .context("write trailing newline")?;
+                output.write_all(b"\n").context("write trailing newline")?;
                 self.id += 1;
             }
 
@@ -90,9 +55,7 @@ impl EchoNode {
 
                 serde_json::to_writer(&mut *output, &reply)
                     .context("serialize respoinse to echo")?;
-                output
-                    .write_all(b"\n")
-                    .context("write trailing newline")?;
+                output.write_all(b"\n").context("write trailing newline")?;
 
                 self.id += 1;
             }
@@ -100,12 +63,19 @@ impl EchoNode {
 
             // throw exception, when receive init_ok
             Payload::InitOk { .. } => {
-                bail!("Receive InitOk Message, this cannot be happen!!")
+                bail!("Receive InitO Message, this cannot be happen!!")
             }
             // do nothing, when receive echo_ok
             Payload::EchoOk { .. } => {}
+
+            Payload::Generate {} => {}
+            Payload::GenerateOk { .. } => {}
         }
 
         Ok(())
     }
+}
+
+fn main() -> anyhow::Result<()> {
+    main_loop(EchoNode { id: 0 })
 }
