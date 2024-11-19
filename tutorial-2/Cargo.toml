@@ -4,12 +4,32 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "rustengan"
+name = "dist"
 path = "src/lib.rs"
 
 [[bin]]
-name = "rustengan"
-path = "src/main.rs"
+name = "echo"
+path = "src/echo/main.rs"
+
+[[bin]]
+name = "unique_id"
+path = "src/unique_id/main.rs"
+
+[[bin]]
+name = "broadcast"
+path = "src/broadcast/main.rs"
+
+[[bin]]
+name = "grow_only_counter"
+path = "src/grow_only_counter/main.rs"
+
+[[bin]]
+name = "kafka_style_log"
+path = "src/kafka_style_log/main.rs"
+
+[[bin]]
+name = "totally_available"
+path = "src/totally_available/main.rs"
 
 
 [dependencies]
