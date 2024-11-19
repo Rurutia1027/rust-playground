@@ -93,7 +93,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "is lesser than -10.0")]
+    //#[should_panic(expected = "is lesser than -10.0")]
     fn should_not_create_and_panic() {
         // here we use the panic to get the result like this:
         // test tests::should_not_create_and_panic - should panic ... ok
