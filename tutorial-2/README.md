@@ -14,6 +14,15 @@ There are multiple ways to install maelstrom, like cargo install, compile source
 
 After download binary file to target path, do not forget declare the classpath and binary path in your `~/.bash_profile`, so that you can use command of `maelstrom` under any path. 
 
+* Do not forget install `gnuplot` by `brew install gnuplot` otherwise you'll get error msg during test 
+```
+WARN [2024-11-19 17:29:19,498] clojure-agent-send-off-pool-1 - jepsen.checker Error while checking history:
+java.lang.IllegalStateException: Error rendering plot, verify gnuplot is installed and reachable
+        at jepsen.checker.perf$plot_BANG_.invokeStatic(perf.clj:489)
+...
+Errors occurred during analysis, but no anomalies found. ಠ~ಠ
+```
+
 ## Run Maelstrom Test Echo Server 
 * [](../maelstrom_test.sh)
 ```shell 

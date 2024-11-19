@@ -2,8 +2,7 @@ use std::collections::HashSet;
 use std::fmt::{self, Debug, Formatter};
 
 use crate::{
-    block::Block, hashtable::Hashtable,
-    u64_bytes, Address, Hash,
+    block::Block, hashtable::Hashtable, u64_bytes, Address, Hash,
 };
 
 /*
@@ -102,10 +101,7 @@ pub struct Output {
 }
 
 impl Output {
-    pub fn new(
-        to_addr: String,
-        value: u64,
-    ) -> Self {
+    pub fn new(to_addr: String, value: u64) -> Self {
         Output { to_addr, value }
     }
 }
@@ -154,17 +150,11 @@ impl Transaction {
     }
 
     pub fn input_value(&self) -> u64 {
-        self.inputs
-            .iter()
-            .map(|input| input.value)
-            .sum()
+        self.inputs.iter().map(|input| input.value).sum()
     }
 
     pub fn output_value(&self) -> u64 {
-        self.outputs
-            .iter()
-            .map(|output| output.value)
-            .sum()
+        self.outputs.iter().map(|output| output.value).sum()
     }
 
     pub fn input_hashes(&self) -> HashSet<Hash> {
@@ -207,17 +197,11 @@ impl Transaction {
     }
 
     pub fn input_total_value(&self) -> u64 {
-        self.inputs
-            .iter()
-            .map(|item| item.value)
-            .sum()
+        self.inputs.iter().map(|item| item.value).sum()
     }
 
     pub fn output_total_value(&self) -> u64 {
-        self.outputs
-            .iter()
-            .map(|item| item.value)
-            .sum()
+        self.outputs.iter().map(|item| item.value).sum()
     }
 }
 
@@ -225,10 +209,7 @@ impl Transaction {
 Let Transaction implement trait of Debug and add more inner details to the function of fmt.
 */
 impl Debug for Transaction {
-    fn fmt(
-        &self,
-        f: &mut fmt::Formatter,
-    ) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
             "Transaction[{:?}]: is_coinbase: {:?}, is_validate: {}, input_len: {}, output_len: {}, input_total_value: {}, output_total_value: {}",
