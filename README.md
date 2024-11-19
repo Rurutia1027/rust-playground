@@ -14,8 +14,13 @@ A collection of Rust-based projects for learning, experimenting, and implementin
 
 ### 2. [Tutorial 2: Intermediate Rust](./tutorial-2/)  
 **Focus:**  
-- Diving deeper into Rust’s capabilities.  
-- Topics include lifetimes, traits, error handling, and module organization.  
+- Dive deeper into Rust while solving real-world distributed systems challenges.
+- **Echo Challenge**: Implement a simple service that echoes received messages. 
+- **Unique ID Generation**: Build a system that generates globally unique IDs across nodes. 
+- **Broadcast System**: create a gossip-based broadcast system to share messages efficiently.
+- **Grow-Only Counter**: Implement a stateless, grow-only counter which will run against Maelstrom's g-counter workload. 
+- **Kafka-Style Log**: Implement a replicated log service similar to Kafka. Replicated logs are often used as a message bus. 
+- **Totally-Available Transactions**: Implement a key/value store which implements transactions.
 
 ### 3. [Tutorial 3: Blockchain Implementation](./tutorial-3/)  
 **Focus:**  
