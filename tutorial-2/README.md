@@ -10,9 +10,9 @@
 
 
 ## Install Maelstrom on Your Mac
-There are multiple way to install maelstrom, both cargo install, compile source codes and download the binary executable files are ok. But I recommend the guys who use Mac with M1 chips to directly download the binary executable file from [last released github page](https://github.com/jepsen-io/maelstrom/releases/tag/v0.2.3) directly, because for M1 chip users compile source codes may face some compiling errors. 
+There are multiple ways to install maelstrom, like cargo install, compile source codes and download the binary executable file. But I recommend the guys who use Mac with M1 chips to directly download the binary executable file from [last released github page](https://github.com/jepsen-io/maelstrom/releases/tag/v0.2.3), because for M1 chip users compile source codes may face some compiling errors. 
 
-After download binary file to target path, do not forget declare the classpath and binary path in your `~/.bash_profile`, so that you can use command of `maelstrom` any path. 
+After download binary file to target path, do not forget declare the classpath and binary path in your `~/.bash_profile`, so that you can use command of `maelstrom` under any path. 
 
 ## Run Maelstrom Test Echo Server 
 * [](../maelstrom_test.sh)
