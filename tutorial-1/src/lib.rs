@@ -98,6 +98,6 @@ mod tests {
         // here we use the panic to get the result like this:
         // test tests::should_not_create_and_panic - should panic ... ok
         // even though here return an Error but it is expected will not terminate during unit test cases' execution
-        let some_circle = shapes::Circle::new_v3(-10.0);
+        let some_circle = shapes::Circle::new_v3(10.0);
     }
 }
