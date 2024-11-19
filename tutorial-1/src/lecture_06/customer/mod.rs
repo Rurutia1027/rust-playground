@@ -7,6 +7,10 @@ pub struct Customer {
 }
 
 impl Customer {
+    /// # Example
+    /// ```
+    /// Customer::new(1, "customer name".to_string(), "customer_email@xxx.com")
+    /// ```
     pub fn new(id: u64, name: String, email: String) -> Self {
         Customer { id, name, email }
     }
