@@ -8,8 +8,11 @@ name = "distributed_system"
 path = "src/lib.rs"
 
 [[bin]]
-name = "tutorial-1"
+name = "rustengan"
 path = "src/main.rs"
 
 
 [dependencies]
+serde = {version = "1", features = ["derive"]}
+serde_json = "1"
+anyhow = "1"
