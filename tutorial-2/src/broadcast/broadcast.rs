@@ -1,5 +1,5 @@
 use anyhow::Context;
-use dist::{main_loop, Body, Message, Node};
+use dist::{main_loop, Message, Node};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::{StdoutLock, Write};
@@ -44,7 +44,8 @@ impl Node<(), Payload> for BroadcastNode {
         input: Message<Payload>,
         output: &mut StdoutLock,
     ) -> anyhow::Result<()> {
-        let mut reply = input.into_reply(Some(&mut self.id));
+        // let mut reply = input.into_reply(Some(&mut self.id));
+        let mut reply = input.clone().into_reply(Some(&mut self.id));
 
         match input.body.payload {
             Payload::Broadcast { message } => {
