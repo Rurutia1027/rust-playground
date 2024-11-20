@@ -19,6 +19,10 @@ path = "src/unique_id/uid.rs"
 name = "broadcast"
 path = "src/broadcast/broadcast.rs"
 
+[[bin]]
+name = "multibroadcast"
+path = "src/broadcast/multi_broadcast.rs"
+
 
 [dependencies]
 serde = {version = "1", features = ["derive"]}
