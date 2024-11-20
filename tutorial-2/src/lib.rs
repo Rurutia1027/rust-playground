@@ -1,13 +1,17 @@
 use anyhow::Context;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::io::StdoutLock;
+use std::io::{BufRead, StdoutLock, Write};
 
 pub mod broadcast;
 pub mod grow_only_counter;
 pub mod kafka_style_log;
 pub mod totally_available;
 
-pub trait Node<Payload> {
+pub trait Node<S, Payload> {
+    fn from_init(s: S, init: Init) -> anyhow::Result<Self>
+    where
+        Self: Sized;
+
     fn step(
         &mut self,
         input: Message<Payload>,
@@ -34,34 +38,62 @@ pub struct Body<Payload> {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
+pub enum InitPayload {
+    Init(Init),
+    InitOk,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Init {
-    node_id: String,
-    node_ids: Vec<String>,
+    pub node_id: String,
+    pub node_ids: Vec<String>,
 }
 
 // here define main_loop
-pub fn main_loop<S, Payload>(mut state: S) -> anyhow::Result<()>
+pub fn main_loop<S, N, P>(init_state: S) -> anyhow::Result<()>
 where
-    S: Node<Payload>,
-    Payload: DeserializeOwned,
+    P: DeserializeOwned,
+    N: Node<S, P>,
 {
-    // Handlers for the system's standard input and output streams.
-    // The `lock` ensures thread safety by preventing other threads
-    // from accessing the input/output stream buffers at the same time
     let stdin = std::io::stdin().lock();
-
-    // We need to write serialized json message and new line character to stdout, so let it be mutable
     let mut stdout = std::io::stdout().lock();
+    let mut stdin = stdin.lines();
 
-    // Receive input stream as iterators of Message
-    let inputs = serde_json::Deserializer::from_reader(stdin)
-        .into_iter::<Message<Payload>>();
+    let init_msg: Message<InitPayload> = serde_json::from_str(
+        &stdin
+            .next()
+            .expect("no init message received")
+            .context("failed to read init message from stdin")?,
+    )
+    .context("init message could not be deserialized")?;
 
-    for input in inputs {
-        let input = input
-            .context("Maelstrom input form STDIN could not be deserialized")?;
-        state
-            .step(input, &mut stdout)
+    let InitPayload::Init(init) = init_msg.body.payload else {
+        panic!("first message should be init");
+    };
+
+    let mut node: N = Node::from_init(init_state, init)
+        .context("node initialization failed")?;
+
+    let reply = Message {
+        src: init_msg.dst,
+        dst: init_msg.src,
+        body: Body {
+            id: Some(0),
+            in_reply_to: init_msg.body.id,
+            payload: InitPayload::InitOk,
+        },
+    };
+
+    serde_json::to_writer(&mut stdout, &reply)
+        .context("serialize response to init")?;
+    stdout.write_all(b"\n");
+
+    for line in stdin {
+        let line =
+            line.context("Maelstrom input form STDIN could not be read")?;
+        let input: Message<P> = serde_json::from_str(&line)
+            .context("Maelstrom input from STDIN could not be deserialized")?;
+        node.step(input, &mut stdout)
             .context("EchoNode step function failed")?;
     }
 
