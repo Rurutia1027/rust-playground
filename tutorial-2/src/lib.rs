@@ -2,11 +2,6 @@ use anyhow::Context;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::io::{BufRead, StdoutLock, Write};
 
-pub mod broadcast;
-pub mod grow_only_counter;
-pub mod kafka_style_log;
-pub mod totally_available;
-
 pub trait Node<S, Payload> {
     fn from_init(s: S, init: Init) -> anyhow::Result<Self>
     where
