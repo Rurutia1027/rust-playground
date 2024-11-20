@@ -34,26 +34,6 @@ pub struct Body<Payload> {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
-pub enum Payload {
-    Generate {},
-    GenerateOk {
-        id: String,
-    },
-    Echo {
-        echo: String,
-    },
-    EchoOk {
-        echo: String,
-    },
-    Init {
-        node_id: String,
-        node_ids: Vec<String>,
-    },
-    InitOk,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
 pub struct Init {
     node_id: String,
     node_ids: Vec<String>,

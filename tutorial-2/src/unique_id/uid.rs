@@ -1,9 +1,24 @@
 use anyhow::Context;
-use dist::{main_loop, Body, Message, Node, Payload};
+use dist::{main_loop, Body, Message, Node};
+use serde::{Deserialize, Serialize};
 use std::io::{StdoutLock, Write};
 
 struct UniqueNode {
     id: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum Payload {
+    Generate {},
+    GenerateOk {
+        id: String,
+    },
+    Init {
+        node_id: String,
+        node_ids: Vec<String>,
+    },
+    InitOk,
 }
 
 impl Node<Payload> for UniqueNode {
@@ -29,8 +44,6 @@ impl Node<Payload> for UniqueNode {
             Payload::InitOk { .. } => {}
             Payload::Generate {} => {}
             Payload::GenerateOk { .. } => {}
-            Payload::Echo { .. } => {}
-            Payload::EchoOk { .. } => {}
         }
 
         Ok(())

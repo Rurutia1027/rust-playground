@@ -1,9 +1,26 @@
 use anyhow::{bail, Context};
-use dist::{main_loop, Body, Message, Node, Payload};
+use dist::{main_loop, Body, Message, Node};
+use serde::{Deserialize, Serialize};
 use std::io::{StdoutLock, Write};
 
 pub struct EchoNode {
     pub id: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum Payload {
+    Echo {
+        echo: String,
+    },
+    EchoOk {
+        echo: String,
+    },
+    Init {
+        node_id: String,
+        node_ids: Vec<String>,
+    },
+    InitOk,
 }
 
 impl Node<Payload> for EchoNode {
@@ -67,9 +84,6 @@ impl Node<Payload> for EchoNode {
             }
             // do nothing, when receive echo_ok
             Payload::EchoOk { .. } => {}
-
-            Payload::Generate {} => {}
-            Payload::GenerateOk { .. } => {}
         }
 
         Ok(())
