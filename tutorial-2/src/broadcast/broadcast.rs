@@ -45,9 +45,8 @@ impl Node<(), Payload> for BroadcastNode {
         output: &mut StdoutLock,
     ) -> anyhow::Result<()> {
         // let mut reply = input.into_reply(Some(&mut self.id));
-        let mut reply = input.clone().into_reply(Some(&mut self.id));
-
-        match input.body.payload {
+        let mut reply = input.into_reply(Some(&mut self.id));
+        match reply.body.payload {
             Payload::Broadcast { message } => {
                 self.messages.push(message);
                 reply.body.payload = Payload::BroadcastOk;
