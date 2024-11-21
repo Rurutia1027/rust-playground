@@ -84,5 +84,5 @@ impl Node<(), Payload> for BroadcastNode {
 }
 
 fn main() -> anyhow::Result<()> {
-    main_loop::<_, BroadcastNode, _>(())
+    main_loop::<_, BroadcastNode, _, _>(())
 }

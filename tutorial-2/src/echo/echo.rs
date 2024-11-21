@@ -30,7 +30,6 @@ impl Node<(), Payload> for EchoNode {
         &mut self,
         input: Event<Payload>,
         output: &mut StdoutLock,
-
     ) -> anyhow::Result<()> {
         let Event::Message(input) = input else {
             panic!("got injected event when there's no event injection");
@@ -54,5 +53,5 @@ impl Node<(), Payload> for EchoNode {
 }
 
 fn main() -> anyhow::Result<()> {
-    main_loop::<_, EchoNode, _>(())
+    main_loop::<_, EchoNode, _, ()>(())
 }

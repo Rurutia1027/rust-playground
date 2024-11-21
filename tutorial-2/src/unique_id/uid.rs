@@ -63,5 +63,5 @@ impl Node<(), Payload> for UniqueNode {
 }
 
 fn main() -> anyhow::Result<()> {
-    main_loop::<_, UniqueNode, _>(())
+    main_loop::<_, UniqueNode, _, _>(())
 }
