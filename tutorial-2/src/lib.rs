@@ -1,20 +1,29 @@
 use anyhow::Context;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::{
-    io::{BufRead, StdoutLock, Write},
-    os::unix::thread,
-};
+use std::io::{BufRead, StdoutLock, Write};
+use std::sync::mpsc::{Receiver, Sender};
 
 pub trait Node<S, Payload> {
-    fn from_init(s: S, init: Init) -> anyhow::Result<Self>
+    fn from_init(
+        s: S,
+        init: Init,
+        inject: std::sync::mpsc::Sender<Event<Payload>>,
+    ) -> anyhow::Result<Self>
     where
         Self: Sized;
 
     fn step(
         &mut self,
-        input: Message<Payload>,
+        input: Event<Payload>,
         output: &mut StdoutLock,
     ) -> anyhow::Result<()>;
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Event<Payload> {
+    Message(Message<Payload>),
+    Injected(Payload),
+    EOF,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -71,6 +80,7 @@ where
     P: DeserializeOwned + Send + 'static,
     N: Node<S, P>,
 {
+    let (tx, rx) = std::sync::mpsc::channel();
     let stdin = std::io::stdin().lock();
     let mut stdout = std::io::stdout().lock();
     let mut stdin = stdin.lines();
@@ -87,7 +97,7 @@ where
         panic!("first message should be init");
     };
 
-    let mut node: N = Node::from_init(init_state, init)
+    let mut node: N = Node::from_init(init_state, init, tx.clone())
         .context("node initialization failed")?;
 
     let reply = Message {
@@ -107,9 +117,6 @@ where
     // --- thread && channel ---
     drop(stdin);
 
-    let (tx, rx) = std::sync::mpsc::channel();
-    let stdin_tx = tx.clone();
-
     let jh = std::thread::spawn(move || {
         let stdin = std::io::stdin().lock();
         for line in stdin.lines() {
@@ -119,11 +126,11 @@ where
                 "Maelstrom input from STDIN could not be deserialized",
             )?;
 
-            if let Err(_) = stdin_tx.send(input) {
+            if let Err(_) = tx.send(Event::Message(input)) {
                 return Ok::<_, anyhow::Error>(());
             }
         }
-
+        let _ = tx.send(Event::EOF);
         Ok(())
     });
 

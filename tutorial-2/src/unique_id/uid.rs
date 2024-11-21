@@ -1,5 +1,5 @@
 use anyhow::Context;
-use dist::{main_loop, Body, Message, Node};
+use dist::{main_loop, Body, Event, Message, Node};
 use serde::{Deserialize, Serialize};
 use std::{
     io::{StdoutLock, Write},
@@ -22,7 +22,11 @@ pub enum Payload {
 }
 
 impl Node<(), Payload> for UniqueNode {
-    fn from_init(_state: (), init: dist::Init) -> anyhow::Result<Self>
+    fn from_init(
+        _state: (),
+        init: dist::Init,
+        inject: std::sync::mpsc::Sender<Event<Payload>>,
+    ) -> anyhow::Result<Self>
     where
         Self: Sized,
     {
@@ -34,9 +38,12 @@ impl Node<(), Payload> for UniqueNode {
 
     fn step(
         &mut self,
-        input: Message<Payload>,
+        input: Event<Payload>,
         output: &mut StdoutLock,
     ) -> anyhow::Result<()> {
+        let Event::Message(input) = input else {
+            panic!();
+        };
         let mut reply = input.into_reply(Some(&mut self.id));
         match reply.body.payload {
             Payload::Generate {} => {

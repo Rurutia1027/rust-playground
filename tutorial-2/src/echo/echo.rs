@@ -1,5 +1,5 @@
-use anyhow::Context;
-use dist::{main_loop, Body, Message, Node};
+use anyhow::{bail, Context};
+use dist::{main_loop, Body, Event, Message, Node};
 use serde::{Deserialize, Serialize};
 use std::io::{StdoutLock, Write};
 
@@ -15,7 +15,11 @@ pub enum Payload {
 }
 
 impl Node<(), Payload> for EchoNode {
-    fn from_init(_s: (), _init: dist::Init) -> anyhow::Result<Self>
+    fn from_init(
+        _s: (),
+        _init: dist::Init,
+        _tx: std::sync::mpsc::Sender<Event<Payload>>,
+    ) -> anyhow::Result<Self>
     where
         Self: Sized,
     {
@@ -24,9 +28,14 @@ impl Node<(), Payload> for EchoNode {
 
     fn step(
         &mut self,
-        input: Message<Payload>,
+        input: Event<Payload>,
         output: &mut StdoutLock,
+
     ) -> anyhow::Result<()> {
+        let Event::Message(input) = input else {
+            panic!("got injected event when there's no event injection");
+        };
+
         let mut reply = input.clone().into_reply(Some(&mut self.id));
         match reply.body.payload {
             Payload::Echo { echo } => {

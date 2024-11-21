@@ -1,5 +1,5 @@
 use anyhow::Context;
-use dist::{main_loop, Message, Node};
+use dist::{main_loop, Event, Message, Node};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::{StdoutLock, Write};
@@ -28,7 +28,11 @@ pub enum Payload {
 }
 
 impl Node<(), Payload> for BroadcastNode {
-    fn from_init(_state: (), init: dist::Init) -> anyhow::Result<Self>
+    fn from_init(
+        _state: (),
+        init: dist::Init,
+        inject: std::sync::mpsc::Sender<Event<Payload>>,
+    ) -> anyhow::Result<Self>
     where
         Self: Sized,
     {
@@ -41,9 +45,12 @@ impl Node<(), Payload> for BroadcastNode {
 
     fn step(
         &mut self,
-        input: Message<Payload>,
+        input: Event<Payload>,
         output: &mut StdoutLock,
     ) -> anyhow::Result<()> {
+        let Event::Message(input) = input else {
+            panic!("got injected event when there's event injection");
+        };
         // let mut reply = input.into_reply(Some(&mut self.id));
         let mut reply = input.into_reply(Some(&mut self.id));
         match reply.body.payload {
