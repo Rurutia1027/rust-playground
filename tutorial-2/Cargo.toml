@@ -17,22 +17,15 @@ path = "src/unique_id/uid.rs"
 
 [[bin]]
 name = "broadcast"
-path = "src/broadcast/main.rs"
+path = "src/broadcast/broadcast.rs"
 
 [[bin]]
-name = "grow_only_counter"
-path = "src/grow_only_counter/main.rs"
-
-[[bin]]
-name = "kafka_style_log"
-path = "src/kafka_style_log/main.rs"
-
-[[bin]]
-name = "totally_available"
-path = "src/totally_available/main.rs"
+name = "multibroadcast"
+path = "src/broadcast/multi_broadcast.rs"
 
 
 [dependencies]
 serde = {version = "1", features = ["derive"]}
 serde_json = "1"
 anyhow = "1"
+rand = "0.8"
