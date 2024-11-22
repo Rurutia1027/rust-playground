@@ -26,7 +26,9 @@ mod shapes {
             if radius >= 0.0 {
                 Ok(Circle::new(radius))
             } else {
-                Err(String::from("illegal radius received, it should be positive"))
+                Err(String::from(
+                    "illegal radius received, it should be positive",
+                ))
             }
         }
 
@@ -49,6 +51,10 @@ mod shapes {
     }
 }
 
+fn some_fn() {
+    
+}
+
 #[cfg(test)]
 mod tests {
     use shapes::Circle;
@@ -66,10 +72,7 @@ mod tests {
             "Custom failure message"
         );
 
-        assert_ne!(
-            larger_circle.contains(&smaller_circule),
-            false
-        );
+        assert_ne!(larger_circle.contains(&smaller_circule), false);
 
         assert!(larger_circle.contains(&smaller_circule));
     }
@@ -79,15 +82,11 @@ mod tests {
         let larger_circle = Circle::new(20.1);
         let smaller_circule = Circle::new(20.0);
 
-        assert_eq!(
-            smaller_circule.contains(&larger_circle),
-            false
-        );
+        assert_eq!(smaller_circule.contains(&larger_circle), false);
     }
 
     #[test]
-    fn create_circle_with_negative_value() -> Result<(), String>
-    {
+    fn create_circle_with_negative_value() -> Result<(), String> {
         let some_circle = Circle::new_v2(-10.2 * -1.0)?;
         Ok(())
     }
