@@ -16,11 +16,12 @@ But, all in all, the **blockchain underlying data** remains consistent across al
 --- 
 ## Configuring GraphNode to Retrieve Ethereum Data 
 
-* Step-1: Connect to an Ethereum Node: 
+### Step-1: Connect to an Ethereum Node: 
 To synchronize with Ethereum, GraphNode needs access to an Ethereum node. This can be achived through: 
-> Local Node: Run a local Ethereum node using Geth or OpenEthereum. 
-> Hosted Services: Use Infura, Alchemy, or QuickNode for remote access. 
-> Update the GraphNode configuraiton to point to your Ethereum node's HTTP or WebSocket RPC endpoint. 
+* Local Node: Run a local Ethereum node using Geth or OpenEthereum. 
+* Hosted Services: Use Infura, Alchemy, or QuickNode for remote access. 
+* Update the GraphNode configuraiton to point to your Ethereum node's HTTP or WebSocket RPC endpoint. 
+  
 ```yaml 
 # docker-compose.yml 
 graph-node: 
@@ -28,7 +29,7 @@ graph-node:
     ethereum: 'mainnet:http://locoalhost:8545'
 ```
 
-* Step-2: Configure IPFS 
+### Step-2: Configure IPFS 
 IPFS is used to store subgraph metadata. Ensure you have an IPFS instance running, and incldue its URL in the configuraiton: 
 ```yaml 
 ipfs:
@@ -36,9 +37,11 @@ ipfs:
     ipfs: 'http://localhost:5001'
 ```
 
-* Step-3: Adding a Subgraph Manifest 
-> 3.1 Define the Subgraph:
+### Step-3: Adding a Subgraph Manifest 
+#### 3.1 Define the Subgraph:
+  
 Create a manifest(`subgraph.yml`) to describe your subgraph. This file includes 
+
 ```yaml 
 # Smart contract addresses
 # Events to listen for 
@@ -66,11 +69,10 @@ dataSource:
         - event: Transfer(indexed address, indexed address, uint256)
           handler: handlerTransfer
       file: ./src/mapping.ts 
-
 ```
 
-> 3.2 Deploy the Subgraph(retrive data from remote/local blockchain, datasets will be filtered and converted into the format we declare in subgraph.yml, and stored to the IPFS ): 
->> use graph-cli to deploy the subgraph to the GraphNode. 
+#### 3.2 Deploy the Subgraph(retrive data from remote/local blockchain, datasets will be filtered and converted into the format we declare in subgraph.yml, and stored to the IPFS ): 
+* use graph-cli to deploy the subgraph to the GraphNode. 
 ```shell 
 graph deploy \
    # this is the remote/lcoal blockchain's node address or actually the exposed endpoint(API)
@@ -81,7 +83,8 @@ graph deploy \
    <SUBGRAPH_NAME>
 ```
 
-> 3.3 Querying Data Using GraphQL 
+#### 3.3 Querying Data Using GraphQL 
+
 ```graphql 
 query {
     transfers(first: 10) {
@@ -93,8 +96,53 @@ query {
 }
 ```
 
-> 3.4 Integrate dApps with GraphQL 
+#### 3.4 Integrate dApps with GraphQL 
 In this steps, we can integrate the GraphNode queried and stored 'on-chain' data with the 'off-chain' dApps, by let the dApp query dataset by GraphQL query langauge via the GraphQL client. 
+
+
+#### 3.5 Define and Implement Handlers 
+We first need to declare the entities in the `subgraph.yml` to tell the GraphNode which entities we need to retrieve, and which need to filtred from the blockchain 'raw data items'. We also declare a series of handlers that need to manipulate upon the items we retrieved from the blockchain 'raw data'. Like this declaration: 
+
+```yaml 
+...
+      entitties:
+        - Transfer 
+      eventHandlers:
+        # declare we monitor the blockchain's Transfer this 'raw data object', and only focus 3 parameters in the object
+        # that is the source indexed address, indexed destination address, and a extra data item
+        - event: Transfer(indexed address, indexed address to, uint256)
+          # here we declare the name of the fucntion that play the role of the handler that manipulate the 
+          # Transfer this object, do filter, convert follow the business requirements
+          handler: handlerTransfer   
+      # this we declare the handler is declared and locates in which sources file, here it is under the src path and implemented in typescrpt 
+      file: ./src/mapping.ts # this is the handler'
+
+```
+
+* Implementaiton of Handlers in `mapping.ts` 
+```typescript 
+import {Transfer} from "../generated/schema"; 
+import {Transfer as TransferEvent} from "../generated/Token/Token"; 
+
+export function handleTransfer(event: TransferEvent): void {
+     // Create a new entity using the transaction hash as an ID
+    let transfer = new Transfer(event.transaction.hash.toHex());
+    transfer.from = event.params.from;
+    transfer.to = event.params.to;
+    transfer.value = event.params.value;
+    transfer.timestamp = event.block.timestamp;
+    transfer.save();
+}
+```
+
+* Bind Event Data to Entities
+* Compilation of the Mappings:
+  - Ensure the `mapping.ts` file is valid and contains all handlers referenced in subgraph.yml 
+  - Use graph-cli to compile the mappings into WebAssembly(Wasm). 
+  ```shell 
+  graph codegen && graph build 
+  ```
+
 --- 
 
 ## Ethereum(e.g., Geth, Infura, Alchemy) in GraphNode 
