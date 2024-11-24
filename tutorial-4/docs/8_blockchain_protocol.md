@@ -106,17 +106,19 @@ We first need to declare the entities in the `subgraph.yml` to tell the GraphNod
 ```yaml 
 ...
       entitties:
+        # here we define the entity name
         - Transfer 
       eventHandlers:
         # declare we monitor the blockchain's Transfer this 'raw data object', and only focus 3 parameters in the object
         # that is the source indexed address, indexed destination address, and a extra data item
-        - event: Transfer(indexed address, indexed address to, uint256)
-          # here we declare the name of the fucntion that play the role of the handler that manipulate the 
+        # here we define the inner fields of the previous declared entities 
+        - event: Transfer(indexed address, indexed address to, uint256, ts timestamp)
+
+          # here we declare the name of the function that play the role of the handler that manipulate the 
           # Transfer this object, do filter, convert follow the business requirements
           handler: handlerTransfer   
       # this we declare the handler is declared and locates in which sources file, here it is under the src path and implemented in typescrpt 
       file: ./src/mapping.ts # this is the handler'
-
 ```
 
 * Implementaiton of Handlers in `mapping.ts` 
@@ -124,6 +126,10 @@ We first need to declare the entities in the `subgraph.yml` to tell the GraphNod
 import {Transfer} from "../generated/schema"; 
 import {Transfer as TransferEvent} from "../generated/Token/Token"; 
 
+// This is similar as the netty's inner handler manipulation 
+// since, we already declare the entities and it's inner fields 
+// this function handlerTransfer will extract TransferEvent multiple parameter's {from, to, and inner vlaue}
+// to the Transfer entity 
 export function handleTransfer(event: TransferEvent): void {
      // Create a new entity using the transaction hash as an ID
     let transfer = new Transfer(event.transaction.hash.toHex());
