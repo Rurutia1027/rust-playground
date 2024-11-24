@@ -1,4 +1,4 @@
-# Blockchain Protocols Supported & Configured in GraphNode
+# Blockchain Protocols & Platforms & Configure Different Blockchain Platforms in GraphNode 
 
 In this note, we mainly focus on configuring and using GraphNode with different blockchain protocols, and different blockchain protocol features and their platforms that store the 'real-world' blockchain datasets we can fetch and analyze. 
 
