@@ -1,3 +1,3 @@
-// Box Smart Pointer
+// RefCell Smart Pointer
 
 fn main() {}
