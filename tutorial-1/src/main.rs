@@ -1,3 +1,3 @@
-// Lifetimes in Rust
+// Box Smart Pointer
 
 fn main() {}
