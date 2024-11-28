@@ -34,6 +34,65 @@ pub async fn get_db_connection(name: &str) -> sqlx::PgConnection {
 
 #[cfg(test)]
 pub mod tests {
+    use core::str;
+
     use async_trait::async_trait;
     use nanoid::nanoid;
+    use sqlx::postgres::PgPoolOptions;
+    use test_context::AsyncTestContext;
+
+    use super::*;
+
+    const ALPHABET: [char; 16] = [
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd',
+        'e', 'f',
+    ];
+
+    pub async fn get_test_db_connection() -> sqlx::PgConnection {
+        get_db_connection("testing").await
+    }
+
+    pub struct TestDb {
+        pub pool: PgPool,
+        name: String,
+    }
+
+    #[async_trait]
+    impl AsyncTestContext for TestDb {
+        async fn setup() -> TestDb {
+            TestDb::new().await
+        }
+
+        async fn teardown(self) {
+            self.pool.close().await;
+            let mut connection = get_test_db_connection().await;
+            sqlx::query(&format!("DROP DATABASE {}", self.name))
+                .execute(&mut connection)
+                .await
+                .unwrap();
+        }
+    }
+
+    impl TestDb {
+        pub async fn new() -> Self {
+            let name = format!("testdb_{}", nanoid::nanoid!(10, &ALPHABET));
+
+            let mut connection = get_test_db_connection().await;
+            sqlx::query(&format!("CREATE DATABASE {name}"))
+                .execute(&mut connection)
+                .await
+                .unwrap();
+
+            let pool = PgPoolOptions::new()
+                .max_connections(1)
+                .connect(
+                    &"postgresql://admin:admin@localhost:5432/defaultdb"
+                        .to_string()
+                        .replace("testdb", &name),
+                )
+                .await
+                .unwrap();
+            Self { pool, name }
+        }
+    }
 }
