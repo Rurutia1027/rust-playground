@@ -34,6 +34,7 @@ jobs:
 
       - name: Run Database Setup Script # run script to prepare table in the defaultdb 
         run: |    
+          echo $(pwd)
           chmod + x tutorial-5/bin/setup-db.sh 
           sh tutorial-5/bin/setup-db.sh
 
