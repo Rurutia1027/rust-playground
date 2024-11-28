@@ -23,6 +23,15 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Install PostgreSQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql postgresql-contrib
+          sudo service postgresql start
+          sudo -u postgres psql -c "CREATE USER admin WITH PASSWORD 'admin';"
+          sudo -u postgres psql -c "CREATE DATABASE defaultdb;"
+          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
+
       - name: Build and Test tutorial-1
         working-directory: ./tutorial-1
         env: 
@@ -43,6 +52,15 @@ jobs:
         working-directory: ./tutorial-3
         env:
           RUSTFLAGS: "-Awarnings"       # Suppress warnings
+        run: |
+          cargo build --verbose
+          cargo test --verbose -- --nocapture
+
+      - name: Build and Test tutorial-5
+        working-directory: ./tutorial-5
+        env:
+          RUSTFLAGS: "-Awarnings"       # Suppress warnings
+          DATABASE_URL: "postgresql://admin:admin@localhost:5432/defaultdb"  # Set database URL for tests
         run: |
           cargo build --verbose
           cargo test --verbose -- --nocapture
