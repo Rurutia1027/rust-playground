@@ -32,6 +32,11 @@ jobs:
           sudo -u postgres psql -c "CREATE DATABASE defaultdb;"
           sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
 
+      - name: Run Database Setup Script # run script to prepare table in the defaultdb 
+        run: |    
+          chmod + x tutorial-5/bin/setup-db.sh 
+          sh tutorial-5/bin/setup-db.sh
+
       - name: Build and Test tutorial-1
         working-directory: ./tutorial-1
         env: 
