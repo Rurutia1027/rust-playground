@@ -38,6 +38,10 @@ jobs:
           chmod 755 ./tutorial-5/bin/setup-db.sh 
           sh tutorial-5/bin/setup-db.sh
 
+      - name: Preapre the Database (Run sqlx prepare)
+        run: |
+          cd tutorial-5 && cargo sqlx prepare --database-url postgres://admin:admin@localhost:5432/defaultdb
+
       - name: Build and Test tutorial-1
         working-directory: ./tutorial-1
         env: 
