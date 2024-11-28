@@ -1,6 +1,7 @@
 use sqlx::{
     postgres::PgPoolOptions, Connection, Executor, PgConnection, PgPool,
 };
+use tracing::{info, trace};
 use tracing_subscriber::fmt::format;
 
 pub async fn get_db_pool(name: &str, max_connections: u32) -> PgPool {
@@ -34,14 +35,12 @@ pub async fn get_db_connection(name: &str) -> sqlx::PgConnection {
 
 #[cfg(test)]
 pub mod tests {
-    use core::str;
-
-    use async_trait::async_trait;
-    use nanoid::nanoid;
-    use sqlx::postgres::PgPoolOptions;
-    use test_context::AsyncTestContext;
+    use crate::init_tracing;
 
     use super::*;
+    use async_trait::async_trait;
+    use sqlx::{postgres::PgPoolOptions, Row};
+    use test_context::AsyncTestContext;
 
     const ALPHABET: [char; 16] = [
         '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd',
@@ -52,15 +51,30 @@ pub mod tests {
         get_db_connection("testing").await
     }
 
+    #[derive(Debug)]
     pub struct TestDb {
         pub pool: PgPool,
-        name: String,
+        pub name: String,
     }
 
     #[async_trait]
     impl AsyncTestContext for TestDb {
         async fn setup() -> TestDb {
-            TestDb::new().await
+            let mut test_db = TestDb::new().await;
+
+            sqlx::query!(
+                "
+                CREATE TABLE IF NOT EXISTS key_value_store (
+                    key VARCHAR(255) PRIMARY KEY,
+                    value TEXT
+                );
+                "
+            )
+            .execute(&test_db.pool)
+            .await
+            .unwrap();
+
+            test_db
         }
 
         async fn teardown(self) {
@@ -76,7 +90,6 @@ pub mod tests {
     impl TestDb {
         pub async fn new() -> Self {
             let name = format!("testdb_{}", nanoid::nanoid!(10, &ALPHABET));
-
             let mut connection = get_test_db_connection().await;
             sqlx::query(&format!("CREATE DATABASE {name}"))
                 .execute(&mut connection)
@@ -88,7 +101,7 @@ pub mod tests {
                 .connect(
                     &"postgresql://admin:admin@localhost:5432/defaultdb"
                         .to_string()
-                        .replace("testdb", &name),
+                        .replace("defaultdb", &name),
                 )
                 .await
                 .unwrap();
