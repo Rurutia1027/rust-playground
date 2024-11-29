@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  rust-dev:
+    image: rust:latest
+    container_name: rust-dev-container
+    volumes:
+      - .:/usr/src/app
+    working_dir: /usr/src/app
+    command: sleep infinity
+    ports:
+      - "8080:8080"
+    environment:
+      - RUST_BACKTRACE=1
+    stdin_open: true
+    tty: true

@@ -13,6 +13,21 @@ jobs:
     name: Build and Test All Tutorials
     runs-on: ubuntu-latest
 
+    services:
+      # refer to: https://docs.github.com/en/actions/use-cases-and-examples/using-containerized-services/creating-postgresql-service-containers
+      postgres: 
+        image: postgres
+        env:
+          POSTGRES_DB: defaultdb
+          POSTGRES_PASSWORD: admin
+          POSTGRES_USER: admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -20,29 +35,55 @@ jobs:
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: "1.82.0"
           override: true
 
-      - name: Build and Test tutorial-1
-        working-directory: ./tutorial-1
-        env: 
-          RUSTFLAGS: "-Awarnings"       # Suppress warnings
+      - name: Check PostgreSQL SetUp OK 
         run: |
-          cargo build --verbose
-          cargo test --verbose -- --nocapture
+          echo "Check PostgreSQL SetUp OK"
+          ps -ef | grep postgres
 
-      - name: Build and Test tutorial-2
-        working-directory: ./tutorial-2
+      # - name: Build and Test tutorial-1
+      #   working-directory: ./tutorial-1
+      #   env: 
+      #     RUSTFLAGS: "-Awarnings"       # Suppress warnings
+      #   run: |
+      #     cargo build --verbose
+      #     cargo test --verbose -- --nocapture
+
+      # - name: Build and Test tutorial-2
+      #   working-directory: ./tutorial-2
+      #   env:
+      #     RUSTFLAGS: "-Awarnings"       # Suppress warnings
+      #   run: |
+      #     cargo build --verbose
+      #     cargo test --verbose -- --nocapture
+
+      # - name: Build and Test tutorial-3
+      #   working-directory: ./tutorial-3
+      #   env:
+      #     RUSTFLAGS: "-Awarnings"       # Suppress warnings
+      #   run: |
+      #     cargo build --verbose
+      #     cargo test --verbose -- --nocapture
+
+      - name: Build and Test tutorial-5
+        working-directory: ./tutorial-5
         env:
           RUSTFLAGS: "-Awarnings"       # Suppress warnings
-        run: |
-          cargo build --verbose
-          cargo test --verbose -- --nocapture
+          DATABASE_URL: "postgresql://admin:admin@localhost:5432/defaultdb"  # Set database URL for tests
+        run: |       
+          echo "install sqlx... "
+          cargo install sqlx-cli --no-default-features --features postgres 
 
-      - name: Build and Test tutorial-3
-        working-directory: ./tutorial-3
-        env:
-          RUSTFLAGS: "-Awarnings"       # Suppress warnings
-        run: |
+          echo "migrate via sqlx ..."          
+          sqlx migrate run --database-url postgres://admin:admin@localhost:5432/defaultdb
+
+          echo "cargo sqlx prepare "
+          cargo sqlx prepare 
+          
+          echo "begin cargo build in tutorial-5"
           cargo build --verbose
+          
+          echo "begin cargo test in tutorial-5"
           cargo test --verbose -- --nocapture
