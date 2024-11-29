@@ -43,29 +43,29 @@ jobs:
           echo "Check PostgreSQL SetUp OK"
           ps -ef | grep postgres
 
-      # - name: Build and Test tutorial-1
-      #   working-directory: ./tutorial-1
-      #   env: 
-      #     RUSTFLAGS: "-Awarnings"       # Suppress warnings
-      #   run: |
-      #     cargo build --verbose
-      #     cargo test --verbose -- --nocapture
+      - name: Build and Test tutorial-1
+        working-directory: ./tutorial-1
+        env: 
+          RUSTFLAGS: "-Awarnings"       # Suppress warnings
+        run: |
+          cargo build --verbose
+          cargo test --verbose -- --nocapture
 
-      # - name: Build and Test tutorial-2
-      #   working-directory: ./tutorial-2
-      #   env:
-      #     RUSTFLAGS: "-Awarnings"       # Suppress warnings
-      #   run: |
-      #     cargo build --verbose
-      #     cargo test --verbose -- --nocapture
+      - name: Build and Test tutorial-2
+        working-directory: ./tutorial-2
+        env:
+          RUSTFLAGS: "-Awarnings"       # Suppress warnings
+        run: |
+          cargo build --verbose
+          cargo test --verbose -- --nocapture
 
-      # - name: Build and Test tutorial-3
-      #   working-directory: ./tutorial-3
-      #   env:
-      #     RUSTFLAGS: "-Awarnings"       # Suppress warnings
-      #   run: |
-      #     cargo build --verbose
-      #     cargo test --verbose -- --nocapture
+      - name: Build and Test tutorial-3
+        working-directory: ./tutorial-3
+        env:
+          RUSTFLAGS: "-Awarnings"       # Suppress warnings
+        run: |
+          cargo build --verbose
+          cargo test --verbose -- --nocapture
 
       - name: Build and Test tutorial-5
         working-directory: ./tutorial-5
