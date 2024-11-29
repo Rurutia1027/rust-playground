@@ -64,5 +64,6 @@ jobs:
         run: |       
           cargo install sqlx-cli --no-default-features --features postgres
           sqlx migrate run --database-url postgres://admin:admin@localhost:5432/defaultdb
+          cargo sqlx prepare 
           cargo build --verbose
           cargo test --verbose -- --nocapture
