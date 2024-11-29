@@ -9,9 +9,10 @@ pub async fn get_value(
     key: &str,
 ) -> Option<Value> {
     trace!(key = key, "getting key value pair");
+
     sqlx::query!(
         "
-        SELECT value FROM key_value_store 
+        SELECT value FROM key_value_store
         WHERE key = $1
         ",
         key,
@@ -109,93 +110,93 @@ mod tests {
         value: u64,
     }
 
-    // #[tokio::test]
-    // async fn test_hello() {
-    //     println!("Test Info");
-    // }
+    #[tokio::test]
+    async fn test_hello() {
+        println!("Test Info");
+    }
 
-    // #[tokio::test]
-    // async fn get_set_value_test() {
-    //     let mut connection = db::tests::get_test_db_connection().await;
+    #[tokio::test]
+    async fn get_set_value_test() {
+        let mut connection = db::tests::get_test_db_connection().await;
 
-    //     let mut transaction = connection.begin().await.unwrap();
+        let mut transaction = connection.begin().await.unwrap();
 
-    //     let test_json_value = TestJsonItem {
-    //         id: "test_id_str".to_string(),
-    //         key: "key_str".to_string(),
-    //         value: 2345,
-    //     };
+        let test_json_value = TestJsonItem {
+            id: "test_id_str".to_string(),
+            key: "key_str".to_string(),
+            value: 2345,
+        };
 
-    //     set_value(
-    //         &mut *transaction,
-    //         "test-key",
-    //         &serde_json::to_value(&test_json_value).unwrap(),
-    //     )
-    //     .await;
+        set_value(
+            &mut *transaction,
+            "test-key",
+            &serde_json::to_value(&test_json_value).unwrap(),
+        )
+        .await;
 
-    //     let value = get_value(&mut *transaction, "test-key").await.unwrap();
-    //     let query_test_json_item =
-    //         serde_json::from_value::<TestJsonItem>(value).unwrap();
+        let value = get_value(&mut *transaction, "test-key").await.unwrap();
+        let query_test_json_item =
+            serde_json::from_value::<TestJsonItem>(value).unwrap();
 
-    //     assert_eq!(query_test_json_item, test_json_value);
-    //     println!(
-    //         "value: {:?}, previous value: {:?}",
-    //         query_test_json_item, test_json_value
-    //     );
-    // }
+        assert_eq!(query_test_json_item, test_json_value);
+        println!(
+            "value: {:?}, previous value: {:?}",
+            query_test_json_item, test_json_value
+        );
+    }
 
-    // #[tokio::test]
-    // async fn get_null_value_test() {
-    //     let mut connection = db::tests::get_test_db_connection().await;
-    //     let mut transaction = connection.begin().await.unwrap();
+    #[tokio::test]
+    async fn get_null_value_test() {
+        let mut connection = db::tests::get_test_db_connection().await;
+        let mut transaction = connection.begin().await.unwrap();
 
-    //     set_value(
-    //         &mut *transaction,
-    //         "test-key-3",
-    //         &serde_json::to_value(json!(None::<String>)).unwrap(),
-    //     )
-    //     .await;
+        set_value(
+            &mut *transaction,
+            "test-key-3",
+            &serde_json::to_value(json!(None::<String>)).unwrap(),
+        )
+        .await;
 
-    //     let value = get_value(&mut *transaction, "test-key-3").await.unwrap();
-    //     let test_json_query_value =
-    //         serde_json::from_value::<Option<String>>(value).unwrap();
+        let value = get_value(&mut *transaction, "test-key-3").await.unwrap();
+        let test_json_query_value =
+            serde_json::from_value::<Option<String>>(value).unwrap();
 
-    //     assert_eq!(None, test_json_query_value);
+        assert_eq!(None, test_json_query_value);
 
-    //     println!("query value {:?}", test_json_query_value);
-    // }
+        println!("query value {:?}", test_json_query_value);
+    }
 
-    // #[tokio::test]
-    // async fn test_query_nonexist_value() {
-    //     let mut test_db = db::tests::TestDb::new().await;
-    //     let db_name = &test_db.name;
-    //     println!(
-    //         "#test_query_nonexist_value we got db name {} and db info {:?}",
-    //         db_name, test_db
-    //     );
-    //     let mut store = KeyValueStorePostgres::new(test_db.pool.clone());
+    #[tokio::test]
+    async fn test_query_nonexist_value() {
+        let mut test_db = db::tests::TestDb::new().await;
+        let db_name = &test_db.name;
+        println!(
+            "#test_query_nonexist_value we got db name {} and db info {:?}",
+            db_name, test_db
+        );
+        let mut store = KeyValueStorePostgres::new(test_db.pool.clone());
 
-    //     // since we use create function to create the db connection instance,
-    //     // we need to create the init table `key_value_store` in the db
+        // since we use create function to create the db connection instance,
+        // we need to create the init table `key_value_store` in the db
 
-    //     sqlx::query!(
-    //         "
-    //         CREATE TABLE IF NOT EXISTS key_value_store(
-    //             key VARCHAR(256) PRIMARY KEY,
-    //             value TEXT
-    //         );
-    //         "
-    //     )
-    //     .execute(&test_db.pool)
-    //     .await
-    //     .unwrap();
+        sqlx::query!(
+            "
+            CREATE TABLE IF NOT EXISTS key_value_store(
+                key VARCHAR(256) PRIMARY KEY,
+                value TEXT
+            ); 
+            "
+        )
+        .execute(&test_db.pool)
+        .await
+        .unwrap();
 
-    //     println!("#test_query_nonexist_value store info {:?}", store);
+        println!("#test_query_nonexist_value store info {:?}", store);
 
-    //     let key = "nonexisting_key";
-    //     let query_value: Option<String> =
-    //         store.get_deserializable_value(key).await;
-    //     println!("#test_query_nonexist_value queried value {:?}", query_value);
-    //     assert_eq!(query_value, None);
-    // }
+        let key = "nonexisting_key";
+        let query_value: Option<String> =
+            store.get_deserializable_value(key).await;
+        println!("#test_query_nonexist_value queried value {:?}", query_value);
+        assert_eq!(query_value, None);
+    }
 }
