@@ -30,9 +30,7 @@ jobs:
           sudo -u postgres psql --no-password -c "CREATE ROLE admin LOGIN PASSWORD 'admin';"
           sudo -u postgres psql --no-password -c "CREATE DATABASE defaultdb OWNER admin;"
           sudo -u postgres psql --no-password -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
-          export DATABASE_URL="postgresql://admin:admin@localhost:5432/defaultdb";
-          echo "Database setup complete, key_value_store table is ready ${DATABASE_URL}!"
-
+      
       - name: Preapre the Database (Run sqlx prepare)
         run: |
           cargo install sqlx-cli --no-default-features --features postgres
