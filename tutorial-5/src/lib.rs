@@ -1,4 +1,5 @@
 pub mod db;
+pub mod env;
 pub mod key_value_store;
 
 pub fn init_tracing() {
