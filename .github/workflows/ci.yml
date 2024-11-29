@@ -30,11 +30,6 @@ jobs:
           sudo -u postgres psql --no-password -c "CREATE ROLE admin LOGIN PASSWORD 'admin';"
           sudo -u postgres psql --no-password -c "CREATE DATABASE defaultdb OWNER admin;"
           sudo -u postgres psql --no-password -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
-          psql --dbname=defaultdb --username=admin --no-password <<EOSQL
-            CREATE TABLE IF NOT EXISTS key_value_store (
-              key VARCHAR(255) PRIMARY KEY,
-              value TEXT NOT NULL
-            );
           export DATABASE_URL="postgresql://admin:admin@localhost:5432/defaultdb";
           echo "Database setup complete, key_value_store table is ready ${DATABASE_URL}!"
 

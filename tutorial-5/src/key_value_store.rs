@@ -94,19 +94,13 @@ impl KeyValueStore for KeyValueStorePostgres {
     }
 }
 
-// in order to create key_value_store table in test_${random} db
-// we add this logic
-use crate::init_tracing;
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::db;
-    use crate::init_tracing;
     use serde::{Deserialize, Serialize};
     use serde_json::json;
     use sqlx::Connection;
-    use tracing::{info, trace};
 
     #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
     struct TestJsonItem {
@@ -117,13 +111,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_hello() {
-        init_tracing();
-        tracing::info!("Test Info");
+        println!("Test Info");
     }
 
     #[tokio::test]
     async fn get_set_value_test() {
-        init_tracing();
         let mut connection = db::tests::get_test_db_connection().await;
 
         let mut transaction = connection.begin().await.unwrap();
@@ -146,16 +138,14 @@ mod tests {
             serde_json::from_value::<TestJsonItem>(value).unwrap();
 
         assert_eq!(query_test_json_item, test_json_value);
-        tracing::info!(
+        println!(
             "value: {:?}, previous value: {:?}",
-            query_test_json_item,
-            test_json_value
+            query_test_json_item, test_json_value
         );
     }
 
     #[tokio::test]
     async fn get_null_value_test() {
-        init_tracing();
         let mut connection = db::tests::get_test_db_connection().await;
         let mut transaction = connection.begin().await.unwrap();
 
@@ -172,18 +162,16 @@ mod tests {
 
         assert_eq!(None, test_json_query_value);
 
-        tracing::info!("query value {:?}", test_json_query_value);
+        println!("query value {:?}", test_json_query_value);
     }
 
     #[tokio::test]
     async fn test_query_nonexist_value() {
-        init_tracing();
         let mut test_db = db::tests::TestDb::new().await;
         let db_name = &test_db.name;
-        tracing::info!(
+        println!(
             "#test_query_nonexist_value we got db name {} and db info {:?}",
-            db_name,
-            test_db
+            db_name, test_db
         );
         let mut store = KeyValueStorePostgres::new(test_db.pool.clone());
 
@@ -202,15 +190,12 @@ mod tests {
         .await
         .unwrap();
 
-        tracing::info!("#test_query_nonexist_value store info {:?}", store);
+        println!("#test_query_nonexist_value store info {:?}", store);
 
         let key = "nonexisting_key";
         let query_value: Option<String> =
             store.get_deserializable_value(key).await;
-        tracing::info!(
-            "#test_query_nonexist_value queried value {:?}",
-            query_value
-        );
+        println!("#test_query_nonexist_value queried value {:?}", query_value);
         assert_eq!(query_value, None);
     }
 }
