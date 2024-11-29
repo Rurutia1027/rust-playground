@@ -1,5 +1,6 @@
 -- Add migration script here
-CREATE TABLE key_value_store (
-    key VARCHAR(255) PRIMARY KEY,
-    value TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS key_value_store (
+    key text NOT NULL,
+    value json NULL,
+    CONSTRAINT key_value_store_pk PRIMARY KEY (key)
 );

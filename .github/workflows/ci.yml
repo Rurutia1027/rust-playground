@@ -65,11 +65,11 @@ jobs:
           echo "install sqlx... "
           cargo install sqlx-cli --no-default-features --features postgres 
 
-          echo "cargo sqlx prepare "
-          cargo sqlx prepare 
-          
           echo "migrate via sqlx ..."          
           sqlx migrate run --database-url postgres://admin:admin@localhost:5432/defaultdb
+
+          echo "cargo sqlx prepare "
+          cargo sqlx prepare 
           
           echo "begin cargo build in tutorial-5"
           cargo build --verbose
