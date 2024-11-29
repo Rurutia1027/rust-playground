@@ -62,8 +62,17 @@ jobs:
           RUSTFLAGS: "-Awarnings"       # Suppress warnings
           DATABASE_URL: "postgresql://admin:admin@localhost:5432/defaultdb"  # Set database URL for tests
         run: |       
-          cargo install sqlx-cli --no-default-features --features postgres
-          sqlx migrate run --database-url postgres://admin:admin@localhost:5432/defaultdb
+          echo "install sqlx... "
+          cargo install sqlx-cli --no-default-features --features postgres 
+
+          echo "cargo sqlx prepare "
           cargo sqlx prepare 
+          
+          echo "migrate via sqlx ..."          
+          sqlx migrate run --database-url postgres://admin:admin@localhost:5432/defaultdb
+          
+          echo "begin cargo build in tutorial-5"
           cargo build --verbose
+          
+          echo "begin cargo test in tutorial-5"
           cargo test --verbose -- --nocapture

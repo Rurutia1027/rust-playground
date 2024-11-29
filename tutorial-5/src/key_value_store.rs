@@ -36,8 +36,8 @@ pub async fn set_value(
         ON CONFLICT (key) DO UPDATE SET 
             value = excluded.value
     ",
-        &key,
-        &value
+        key,
+        value
     )
     .execute(executor)
     .await
