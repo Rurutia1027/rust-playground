@@ -16,10 +16,10 @@ KVStore supports key & value `get_value` and `set_value` operations, where the v
 
 #### Key Features of `sqlx`:
 
-- Compile-time: Ensures SQL queries are correct by checking them against the database schema during compile time, preventing runtime errors.
-- Async support: Fully async, making it ideal for scalable applications that need to perform non-blocking database queries.
-- Supports multiple databases: Works with PostgreSQL, MySQL, and SQLite.
-- Type safety: Automatically maps Rust types to SQL types, ensuring the correct mapping of values.
+- **Compile-time**: Ensures SQL queries are correct by checking them against the database schema during compile time, preventing runtime errors.
+- **Async support**: Fully async, making it ideal for scalable applications that need to perform non-blocking database queries.
+- **Supports multiple databases**: Works with PostgreSQL, MySQL, and SQLite.
+- **Type safety**: Automatically maps Rust types to SQL types, ensuring the correct mapping of values.
 
 ### How to Use `sqlx`
 
