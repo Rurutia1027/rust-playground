@@ -7,7 +7,7 @@ edition = "2021"
 async-trait = "0.1"    # async trait providder 
 serde = { version = "1.0", features = ["derive"] } # serialize & deserialize provider 
 serde_json = "1.0"          # serde json handler 
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-native-tls"] } # postgre db connector 
+sqlx = { version = "0.7.2", features = ["postgres", "runtime-tokio-native-tls"] } # postgre db connector 
 tracing = "0.1"             # log tracer 
 tokio = { version = "1", features = ["full"] } 
 tracing-subscriber = "0.3"

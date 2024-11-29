@@ -27,5 +27,6 @@ CREATE TABLE IF NOT EXISTS key_value_store (
 );
 "
 
+export DATABASE_URL="postgresql://admin:admin@localhost:5432/defaultdb"
 # Print confirmation
 echo "Database setup complete, key_value_store table is ready!"

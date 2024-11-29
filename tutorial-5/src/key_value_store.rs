@@ -9,7 +9,6 @@ pub async fn get_value(
     key: &str,
 ) -> Option<Value> {
     trace!(key = key, "getting key value pair");
-
     sqlx::query!(
         "
         SELECT value FROM key_value_store 
