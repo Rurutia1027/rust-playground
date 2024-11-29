@@ -2,6 +2,8 @@ use sqlx::{
     postgres::PgPoolOptions, Connection, Executor, PgConnection, PgPool,
 };
 
+use crate::env::ENV_CONFIG;
+
 pub async fn get_db_pool(name: &str, max_connections: u32) -> PgPool {
     let name_query = format!("SET application_name = '{}';", name);
     PgPoolOptions::new()
@@ -14,17 +16,15 @@ pub async fn get_db_pool(name: &str, max_connections: u32) -> PgPool {
         })
         .max_connections(max_connections)
         // this db url will be extracted as env conf
-        .connect("postgresql://admin:admin@localhost:5432/defaultdb")
+        .connect(&ENV_CONFIG.db_url)
         .await
         .expect("expect DB to be available to connect")
 }
 
 pub async fn get_db_connection(name: &str) -> sqlx::PgConnection {
-    let mut conn = PgConnection::connect(
-        "postgresql://admin:admin@localhost:5432/defaultdb",
-    )
-    .await
-    .expect("expect DB to be available to connect");
+    let mut conn = PgConnection::connect(&ENV_CONFIG.db_url)
+        .await
+        .expect("expect DB to be available to connect");
 
     let query = format!("SET application_name = '{}'", name);
     sqlx::query(&query).execute(&mut conn).await.unwrap();
@@ -95,11 +95,7 @@ pub mod tests {
 
             let pool = PgPoolOptions::new()
                 .max_connections(1)
-                .connect(
-                    &"postgresql://admin:admin@localhost:5432/defaultdb"
-                        .to_string()
-                        .replace("defaultdb", &name),
-                )
+                .connect(&ENV_CONFIG.db_url.replace("testdb", &name))
                 .await
                 .unwrap();
 
