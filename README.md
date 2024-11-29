@@ -35,6 +35,49 @@ A collection of Rust-based projects for learning, experimenting, and implementin
   - Mining simulation.
   - Hashing and validation logic.
 
+### 4. [Tutorial 4: Graph Node Usage and Source Code Reading Notes](./tutorial-4/)
+
+**Focus:**
+This tutorial delves into **GraphNode**, a critical middleware layer for indexing and querying blockchain data, with a focus on Ethereum. We'll lean how Graph Node extract blockchain data, organize it into subgraphs, and store it in relational databases based on a user-defined schema. We also explore how to read and understand Graph Node source codes.
+
+### 5. [Tutorial 5: Advanced Rust Applications in Blockchain and APIs](./tutorial-3/)
+
+**Focus:**
+Building a production-grade Rust application with real-world use cases, such as implementing a key-value store, managing configuraiton environments, integrating with Ethereum, and handling event-driven workflows. This tutorial showcases how to create a robust system that interacts with blockchain data and local databases.
+
+**Key Features:**
+
+1. Key-Value Store(KVStore):
+2. Environment Loader and Config Management:
+3. Framework API Binding with Handlers:
+4. Ethereum Event Subscription:
+5. Data Synchronization to Local Database:
+6. Monitoring Blockchain Events:
+7. Handler and Listener Design:
+
+**Project Files:**
+
+- Code and examples are in the `tutorial-5` folder.
+- Contains implementations for KVStore, Database Operations, Ethereum event monitoring & handling, and API bindings.
+
+**Modules:**
+
+```rust
+todo!();
+```
+
+**Goals:**
+
+- Provide a clear path to building production-ready applications.
+- Combine blockchain intergration with local database management.
+- Enhance understanding of Rust's ecosystem, async programming, and database interactions.
+
+**References:**
+We referred to several amazing open-source repositories, listed below with brief descriptions:
+
+- [eth-analysis-rs](https://github.com/ultrasoundmoney/eth-analysis-rs): A Rust-based toolkit for analyzing Ethereum blockchain data, including transaction tracing and state changes.
+- [mars](https://github.com/deepeth/mars): A service for querying and storing Ethereum data efficiently, providing a robust data pipeline for blockchain analysis.
+
 ---
 
 ## 🌟 Features
