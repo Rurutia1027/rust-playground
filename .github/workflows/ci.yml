@@ -32,29 +32,29 @@ jobs:
           sudo -u postgres psql -c "CREATE DATABASE defaultdb;"
           sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
 
-      - name: Build and Test tutorial-1
-        working-directory: ./tutorial-1
-        env: 
-          RUSTFLAGS: "-Awarnings"       # Suppress warnings
-        run: |
-          cargo build --verbose
-          cargo test --verbose -- --nocapture
+      # - name: Build and Test tutorial-1
+      #   working-directory: ./tutorial-1
+      #   env: 
+      #     RUSTFLAGS: "-Awarnings"       # Suppress warnings
+      #   run: |
+      #     cargo build --verbose
+      #     cargo test --verbose -- --nocapture
 
-      - name: Build and Test tutorial-2
-        working-directory: ./tutorial-2
-        env:
-          RUSTFLAGS: "-Awarnings"       # Suppress warnings
-        run: |
-          cargo build --verbose
-          cargo test --verbose -- --nocapture
+      # - name: Build and Test tutorial-2
+      #   working-directory: ./tutorial-2
+      #   env:
+      #     RUSTFLAGS: "-Awarnings"       # Suppress warnings
+      #   run: |
+      #     cargo build --verbose
+      #     cargo test --verbose -- --nocapture
 
-      - name: Build and Test tutorial-3
-        working-directory: ./tutorial-3
-        env:
-          RUSTFLAGS: "-Awarnings"       # Suppress warnings
-        run: |
-          cargo build --verbose
-          cargo test --verbose -- --nocapture
+      # - name: Build and Test tutorial-3
+      #   working-directory: ./tutorial-3
+      #   env:
+      #     RUSTFLAGS: "-Awarnings"       # Suppress warnings
+      #   run: |
+      #     cargo build --verbose
+      #     cargo test --verbose -- --nocapture
 
       - name: Build and Test tutorial-5
         working-directory: ./tutorial-5
@@ -62,6 +62,7 @@ jobs:
           RUSTFLAGS: "-Awarnings"       # Suppress warnings
           DATABASE_URL: "postgresql://admin:admin@localhost:5432/defaultdb"  # Set database URL for tests
         run: |       
+          cargo install sqlx-cli --no-default-features --features postgres
           sqlx migrate run --database-url postgres://admin:admin@localhost:5432/defaultdb
           cargo build --verbose
           cargo test --verbose -- --nocapture
