@@ -23,20 +23,20 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Install PostgreSQL
+      - name: Initialize PostgreSQL Database
+        env:
+          PGPASSWORD: admin
         run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql postgresql-contrib
-          sudo service postgresql start
-          sudo -u postgres psql -c "CREATE USER admin WITH PASSWORD 'admin';"
-          sudo -u postgres psql -c "CREATE DATABASE defaultdb;"
-          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
-
-      - name: Run Database Setup Script # run script to prepare table in the defaultdb 
-        run: |    
-          echo $(pwd)
-          chmod 755 ./tutorial-5/bin/setup-db.sh 
-          sh tutorial-5/bin/setup-db.sh
+          sudo -u postgres psql --no-password -c "CREATE ROLE admin LOGIN PASSWORD 'admin';"
+          sudo -u postgres psql --no-password -c "CREATE DATABASE defaultdb OWNER admin;"
+          sudo -u postgres psql --no-password -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
+          psql --dbname=defaultdb --username=admin --no-password <<EOSQL
+            CREATE TABLE IF NOT EXISTS key_value_store (
+              key VARCHAR(255) PRIMARY KEY,
+              value TEXT NOT NULL
+            );
+          export DATABASE_URL="postgresql://admin:admin@localhost:5432/defaultdb";
+          echo "Database setup complete, key_value_store table is ready ${DATABASE_URL}!"
 
       - name: Preapre the Database (Run sqlx prepare)
         run: |
