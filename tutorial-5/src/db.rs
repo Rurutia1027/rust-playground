@@ -1,6 +1,5 @@
 use sqlx::{
-    migrate, postgres::PgPoolOptions, Connection, Executor, PgConnection,
-    PgPool,
+    postgres::PgPoolOptions, Connection, Executor, PgConnection, PgPool,
 };
 
 pub async fn get_db_pool(name: &str, max_connections: u32) -> PgPool {

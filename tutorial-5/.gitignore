@@ -1,0 +1,9 @@
+/target
+.idea
+.vscode/
+Cargo.lock
+**/src/main
+**/src/Cargo.lock
+/store 
+**/bin/store/
+.sqlx/

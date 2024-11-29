@@ -20,7 +20,7 @@ jobs:
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: "1.82.0"
           override: true
 
       - name: Install PostgreSQL
@@ -61,8 +61,7 @@ jobs:
         env:
           RUSTFLAGS: "-Awarnings"       # Suppress warnings
           DATABASE_URL: "postgresql://admin:admin@localhost:5432/defaultdb"  # Set database URL for tests
-        run: |
-          cargo install sqlx-cli --no-default-features --features postgres
+        run: |       
           sqlx migrate run --database-url postgres://admin:admin@localhost:5432/defaultdb
           cargo build --verbose
           cargo test --verbose -- --nocapture
