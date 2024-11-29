@@ -23,18 +23,14 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Initialize PostgreSQL Database
-        env:
-          PGPASSWORD: admin
+      - name: Install PostgreSQL
         run: |
-          sudo -u postgres psql --no-password -c "CREATE ROLE admin LOGIN PASSWORD 'admin';"
-          sudo -u postgres psql --no-password -c "CREATE DATABASE defaultdb OWNER admin;"
-          sudo -u postgres psql --no-password -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
-      
-      - name: Preapre the Database (Run sqlx prepare)
-        run: |
-          cargo install sqlx-cli --no-default-features --features postgres
-          cd tutorial-5 && cargo sqlx prepare --database-url postgres://admin:admin@localhost:5432/defaultdb
+          sudo apt-get update
+          sudo apt-get install -y postgresql postgresql-contrib
+          sudo service postgresql start
+          sudo -u postgres psql -c "CREATE USER admin WITH PASSWORD 'admin';"
+          sudo -u postgres psql -c "CREATE DATABASE defaultdb;"
+          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
 
       - name: Build and Test tutorial-1
         working-directory: ./tutorial-1
@@ -66,5 +62,7 @@ jobs:
           RUSTFLAGS: "-Awarnings"       # Suppress warnings
           DATABASE_URL: "postgresql://admin:admin@localhost:5432/defaultdb"  # Set database URL for tests
         run: |
+          cargo install sqlx-cli --no-default-features --features postgres
+          cargo sqlx prepare --database-url postgres://admin:admin@localhost:5432/defaultdb
           cargo build --verbose
           cargo test --verbose -- --nocapture
