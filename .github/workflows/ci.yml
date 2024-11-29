@@ -13,6 +13,21 @@ jobs:
     name: Build and Test All Tutorials
     runs-on: ubuntu-latest
 
+    services:
+      # refer to: https://docs.github.com/en/actions/use-cases-and-examples/using-containerized-services/creating-postgresql-service-containers
+      postgres: 
+        image: postgres
+        env:
+          POSTGRES_DB: defaultdb
+          POSTGRES_PASSWORD: admin
+          POSTGRES_USER: admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -23,14 +38,10 @@ jobs:
           toolchain: "1.82.0"
           override: true
 
-      - name: Install PostgreSQL
+      - name: Check PostgreSQL SetUp OK 
         run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql postgresql-contrib
-          sudo service postgresql start
-          sudo -u postgres psql -c "CREATE USER admin WITH PASSWORD 'admin';"
-          sudo -u postgres psql -c "CREATE DATABASE defaultdb;"
-          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE defaultdb TO admin;"
+          echo "Check PostgreSQL SetUp OK"
+          ps -ef | grep postgres
 
       # - name: Build and Test tutorial-1
       #   working-directory: ./tutorial-1
