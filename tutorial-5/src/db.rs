@@ -1,8 +1,7 @@
 use sqlx::{
-    postgres::PgPoolOptions, Connection, Executor, PgConnection, PgPool,
+    migrate, postgres::PgPoolOptions, Connection, Executor, PgConnection,
+    PgPool,
 };
-use tracing::{info, trace};
-use tracing_subscriber::fmt::format;
 
 pub async fn get_db_pool(name: &str, max_connections: u32) -> PgPool {
     let name_query = format!("SET application_name = '{}';", name);
@@ -35,7 +34,6 @@ pub async fn get_db_connection(name: &str) -> sqlx::PgConnection {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::init_tracing;
 
     use super::*;
     use async_trait::async_trait;
@@ -105,6 +103,9 @@ pub mod tests {
                 )
                 .await
                 .unwrap();
+
+            sqlx::migrate!("./migrations").run(&pool).await.unwrap();
+
             Self { pool, name }
         }
     }

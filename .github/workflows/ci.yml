@@ -63,6 +63,6 @@ jobs:
           DATABASE_URL: "postgresql://admin:admin@localhost:5432/defaultdb"  # Set database URL for tests
         run: |
           cargo install sqlx-cli --no-default-features --features postgres
-          cargo sqlx prepare --database-url postgres://admin:admin@localhost:5432/defaultdb
+          sqlx migrate run --database-url postgres://admin:admin@localhost:5432/defaultdb
           cargo build --verbose
           cargo test --verbose -- --nocapture
