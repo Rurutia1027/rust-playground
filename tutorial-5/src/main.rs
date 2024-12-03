@@ -1,6 +1,6 @@
-use tutorial_5::server::start_server;
-
+use tutorial_5::serve::server;
 #[tokio::main]
-async fn main() {
-    start_server().await
+pub async fn main() {
+    // this func should be commented to avoid main func block ci/cd pipeline
+    server::start_server().await
 }

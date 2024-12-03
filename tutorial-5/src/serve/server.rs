@@ -2,7 +2,7 @@ use axum::{response::IntoResponse, routing::get, Router};
 use std::net::SocketAddr;
 use tracing::info;
 
-use crate::mockservices::{rust, RustService, Web3Service, WorldService};
+use crate::mockservices::{RustService, Web3Service, WorldService};
 
 pub async fn start_server() {
     // here we initialize logging
