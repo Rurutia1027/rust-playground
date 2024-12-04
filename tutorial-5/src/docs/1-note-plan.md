@@ -22,3 +22,7 @@ While cache udpates are a key metric, here are a few other system health indicat
 - **Resource Usage(CPU, Memory, Disk):**: These metrics can highlight if the system is under heavy load, potentially affecting cache updates.
 
 ## Add More Server Side Healthy Status Statistics
+
+```rust
+todo!()
+```
