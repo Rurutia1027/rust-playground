@@ -1,6 +1,5 @@
-use anyhow::Result;
+use anyhow::{Context, Error, Result};
 use enum_iterator::Sequence;
-use futures::executor;
 use serde::Serialize;
 use serde_json::Value;
 use sqlx::{PgExecutor, PgPool};
@@ -135,5 +134,65 @@ mod tests {
         let notification = notification_future.await.unwrap();
 
         assert_eq!(notification.payload(), CacheKey::EthPrice.to_db_key())
+    }
+
+    #[tokio::test]
+    async fn get_serialized_cacheing_value_test() {
+        // first, we create an instance of the test db
+        let test_db = db::tests::TestDb::new().await;
+
+        // then, we send the instance of the test db's db connection pool instance to the key value store
+        let key_value_store = KeyValueStorePostgres::new(test_db.pool.clone());
+
+        // here we create a instance of struct and kv store will store it
+        // with value serialized into the json by serde_json automatically s
+        let test_json_obj = TestJsonItem {
+            name: "Sebby".to_string(),
+            age: 22,
+        };
+
+        // we take the CacheKey's EthPrice as the key
+        // and the object's json serialized as the value
+        // and because the kv_store#set_serializable_value is an async function
+        // so we invoke .await here
+        key_value_store
+            .set_serializable_value(
+                &CacheKey::EthPrice.to_db_key(),
+                &test_json_obj,
+            )
+            .await;
+
+        // after the previous async function executed, here we try to extract the value by the given key here
+        // to verify whether the save&serialized function and query&deserialized function works as expected.
+        let raw_value: Value =
+            get_serialized_caching_value(&key_value_store, &CacheKey::EthPrice)
+                .await
+                .unwrap();
+        let query_value = serde_json::to_value(test_json_obj).unwrap();
+        assert_eq!(query_value, raw_value);
+    }
+
+    #[tokio::test]
+    async fn get_set_caching_value_test() -> Result<()> {
+        let test_db = db::tests::TestDb::new().await;
+        let key_value_store = KeyValueStorePostgres::new(test_db.pool.clone());
+
+        let test_json_item = TestJsonItem {
+            age: 22,
+            name: "Hale".to_string(),
+        };
+
+        set_value(&test_db.pool, &CacheKey::EthPrice, test_json_item.clone())
+            .await;
+
+        let caching_value = key_value_store
+            .get_deserializable_value::<TestJsonItem>(
+                &CacheKey::EthPrice.to_db_key(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(caching_value, test_json_item);
+
+        Ok(())
     }
 }
