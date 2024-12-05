@@ -169,6 +169,7 @@ mod tests {
                 .await
                 .unwrap();
         let query_value = serde_json::to_value(test_json_obj).unwrap();
+        println!("raw_value: {:?}, query_value: {:?}", raw_value, query_value);
         assert_eq!(query_value, raw_value);
     }
 
