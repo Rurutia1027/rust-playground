@@ -191,7 +191,7 @@ mod tests {
             )
             .await
             .unwrap();
-        // assert_eq!(caching_value, test_json_item);
+        assert_eq!(caching_value, test_json_item);
         println!(
             "cache_value: {:?}, test_json_item: {:?}",
             caching_value, test_json_item
