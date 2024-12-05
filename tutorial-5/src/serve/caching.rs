@@ -1,13 +1,10 @@
 use axum::{http::HeaderValue, response::IntoResponse, Extension, Json};
 use chrono::Duration;
 use enum_iterator::all;
-use futures::{Stream, TryStreamExt};
 use hyper::HeaderMap;
 use lazy_static::lazy_static;
 use reqwest::{header, StatusCode};
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlx::{postgres::PgNotification, PgPool};
 use std::{
     collections::HashMap,
     sync::{Arc, RwLock},
@@ -75,11 +72,58 @@ impl Cache {
         }
     }
 
+    // function create an instance of Cache
+    // and initialized with data items loaded from database
     pub async fn new_with_data(key_value_store: &impl KeyValueStore) -> Self {
         let cache = Self::new();
         cache.load_from_db(key_value_store).await;
         cache
     }
+}
+
+pub async fn cached_get_with_custom_duration(
+    Extension(state): StateExtension,
+    analysis_cache_key: &CacheKey,
+    max_age: &Duration,
+    stale_while_revalidate: &Duration,
+) -> impl IntoResponse {
+    let mut headers = HeaderMap::new();
+
+    // here we create an instance of http header cache map
+    // and set some init config value in it, like cache max time and stale time
+    headers.insert(
+        header::CACHE_CONTROL,
+        HeaderValue::from_str(&format!(
+            "public, max-age={}, stale-while-revalidate={}",
+            max_age.num_seconds(),
+            stale_while_revalidate.num_seconds()
+        ))
+        .unwrap(),
+    );
+
+    // here we try to query the value from local memory based hash cache
+    // by given cache key
+    // if query something then build response body with the previous hash cache, and reply
+    // otherwise, reply the response with 'service unavailable'
+    match state.cache.0.read().unwrap().get(analysis_cache_key) {
+        None => StatusCode::SERVICE_UNAVAILABLE.into_response(),
+        Some(cached_value) => {
+            (headers, Json(cached_value).into_response()).into_response()
+        }
+    }
+}
+
+pub async fn cached_get(
+    state: StateExtension,
+    analysis_cache_key: &CacheKey,
+) -> impl IntoResponse {
+    cached_get_with_custom_duration(
+        state,
+        analysis_cache_key,
+        &SIX_SECONDS,
+        &TWO_MINUTES,
+    )
+    .await
 }
 
 lazy_static! {
@@ -89,13 +133,10 @@ lazy_static! {
 
 #[cfg(test)]
 mod test {
-    use std::{collections::HashSet, iter};
-
-    use header::Keys;
-    use serde::{Deserialize, Serialize};
-
     use super::*;
-    use crate::{caching::CacheKey, db};
+    use crate::{caching::CacheKey, db, serve::health::ServeHealth};
+    use std::any::Any;
+    use std::collections::HashSet;
 
     #[tokio::test]
     async fn test_cache_key_iter() {
@@ -158,6 +199,47 @@ mod test {
         let local_cache_map = cache.0.read().unwrap();
         for (k, v) in local_cache_map.iter() {
             assert!(key_set.contains(k));
+        }
+    }
+
+    use chrono::Utc;
+
+    // in this test case, we test the logic of cached_get this funciton which is implemented to retrive data
+    // from memory hash cache and wrap return value into http response message
+    // first, we initialize the test db , and build key value store based on the test db
+    // second, we create instance of local memory based cache and passing previously created kv-store to initialize it
+    // third, we inject series of values to the db based key-value store,
+    // fourth, we let created memory based cache load all data from db layer to memory layer
+    // fifth, we traverse all set of the CacheKey set and passing it to the cached_get function to verify whether the existing value
+    // in the memory based cache can be converted into the IntoResponse correctly
+    #[tokio::test]
+    async fn test_cached_get_logic() {
+        let test_db = db::tests::TestDb::new().await;
+        let kv_store = KeyValueStorePostgres::new(test_db.pool.clone());
+        let keys = all::<CacheKey>().collect::<Vec<_>>();
+        for key in keys {
+            let value = mock_cache_key_value(key);
+            kv_store
+                .set_serializable_value(&key.to_db_key(), &value)
+                .await;
+        }
+
+        let cache = Cache::new_with_data(&kv_store).await;
+
+        // here we create an instance of State this just like the spring context
+        // which manages and holds a series of singleton insteances thread-safely
+        let state = Arc::new(State {
+            cache: cache,
+            db_pool: test_db.pool.clone(),
+            health: ServeHealth::new(Utc::now()),
+        });
+
+        // just kidding ... let me understand state better in Rust
+        let spring_context = Extension(state);
+        let keys = all::<CacheKey>().collect::<HashSet<_>>();
+        for analysis_cache_key in keys {
+            let contex = spring_context.clone();
+            let ret = cached_get(contex, &analysis_cache_key).await;
         }
     }
 
