@@ -69,7 +69,7 @@ impl KeyValueStorePostgres {
             .and_then(|value| serde_json::from_value(value).ok())
     }
 
-    pub async fn set_serializable_value<S: Serialize>(
+    pub async fn set_serializable_value<S: serde::Serialize>(
         &self,
         key: &str,
         value: S,

@@ -9,7 +9,7 @@ struct Car {
 
 fn main() {
     // this shows how to create an instance of a struct
-    // all assignments should be warpped by curly braces
+    // all assignments should be wrapped by curly braces
     // and all fields should assigend correspoinding values
     let my_car = Car {
         owener: String::from("Mae"),
@@ -47,14 +47,12 @@ fn main() {
     // );
     // to this we can use clone to avoid hand over the ownership from struct instance to the variable
 
-    let mut mutable_extracted_fuel_level =
-        my_carr.fuel_level.clone();
+    let mut mutable_extracted_fuel_level = my_carr.fuel_level.clone();
 
     // modify clone value
     mutable_extracted_fuel_level = 550.0;
 
-    let immutable_extracted_fuel_level_v2 =
-        my_carr.fuel_level.clone();
+    let immutable_extracted_fuel_level_v2 = my_carr.fuel_level.clone();
 
     // in this way we can get both access to variable and struct instance's field value
     println!(
@@ -93,5 +91,5 @@ fn main() {
     let p_3D = Point_3D(3, 4, 5);
 
     // Unit Struct
-    struct ABC; 
+    struct ABC;
 }

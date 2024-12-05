@@ -35,7 +35,7 @@ fn get_grade(
 // and Result's Rust inner definition is shown below
 // enum Result<T, E> {
 //    Ok(T),
-//    Err(E), --> this is different from None it support warpping different types of error in it
+//    Err(E), --> this is different from None it support wrapping different types of error in it
 // }
 fn check_student(
     student_name: &String,
@@ -88,8 +88,7 @@ fn main() {
     ];
 
     let student_name = String::from("Bob");
-    let student_status =
-        check_student_get_grade(&student_name, &student_db);
+    let student_status = check_student_get_grade(&student_name, &student_db);
 
     match student_status {
         Ok(options_grade) => {
@@ -103,8 +102,7 @@ fn main() {
     }
 
     let student_name = String::from("A");
-    let student_status =
-        check_student_get_grade(&student_name, &student_db);
+    let student_status = check_student_get_grade(&student_name, &student_db);
     match student_status {
         Ok(options_grade) => {
             if let Some(grade) = options_grade {

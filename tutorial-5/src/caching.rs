@@ -1,8 +1,8 @@
-use anyhow::{Context, Error, Result};
+use anyhow::Result;
 use enum_iterator::Sequence;
 use serde::Serialize;
 use serde_json::Value;
-use sqlx::{PgExecutor, PgPool};
+use sqlx::PgExecutor;
 use std::{fmt::Display, str::FromStr};
 use thiserror::Error;
 use tracing::debug;
@@ -157,17 +157,19 @@ mod tests {
         // so we invoke .await here
         key_value_store
             .set_serializable_value(
-                &CacheKey::EthPrice.to_db_key(),
+                &CacheKey::AverageEthPrice.to_db_key(),
                 &test_json_obj,
             )
             .await;
 
         // after the previous async function executed, here we try to extract the value by the given key here
         // to verify whether the save&serialized function and query&deserialized function works as expected.
-        let raw_value: Value =
-            get_serialized_caching_value(&key_value_store, &CacheKey::EthPrice)
-                .await
-                .unwrap();
+        let raw_value: Value = get_serialized_caching_value(
+            &key_value_store,
+            &CacheKey::AverageEthPrice,
+        )
+        .await
+        .unwrap();
         let query_value = serde_json::to_value(test_json_obj).unwrap();
         println!("raw_value: {:?}, query_value: {:?}", raw_value, query_value);
         assert_eq!(query_value, raw_value);
@@ -192,11 +194,12 @@ mod tests {
             )
             .await
             .unwrap();
-        assert_eq!(caching_value, test_json_item);
+
         println!(
             "cache_value: {:?}, test_json_item: {:?}",
             caching_value, test_json_item
         );
+        assert_eq!(caching_value, test_json_item);
 
         Ok(())
     }
