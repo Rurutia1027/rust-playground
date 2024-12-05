@@ -1,10 +1,12 @@
 use axum::{http::HeaderValue, response::IntoResponse, Extension, Json};
 use chrono::Duration;
 use enum_iterator::all;
+use futures::{Stream, TryStreamExt};
 use hyper::HeaderMap;
 use lazy_static::lazy_static;
 use reqwest::{header, StatusCode};
 use serde_json::Value;
+use sqlx::{postgres::PgNotification, PgPool};
 use std::{
     collections::HashMap,
     sync::{Arc, RwLock},
@@ -15,7 +17,7 @@ use tracing::{debug, info, trace, warn};
 use crate::{
     caching::{self, CacheKey, ParseCacheKeyError},
     env::ENV_CONFIG,
-    key_value_store::{self, KeyValueStore, KeyValueStorePostgres},
+    key_value_store::{KeyValueStore, KeyValueStorePostgres},
 };
 
 use super::{State, StateExtension};
@@ -126,6 +128,64 @@ pub async fn cached_get(
     .await
 }
 
+async fn process_notifications(
+    mut notification_stream: impl Stream<Item = Result<PgNotification, sqlx::Error>>
+        + Unpin,
+    state: Arc<State>,
+    key_value_store: impl KeyValueStore,
+) {
+    while let Some(notification) = notification_stream.try_next().await.unwrap()
+    {
+        let payload = notification.payload();
+        match payload.parse::<CacheKey>() {
+            Err(ParseCacheKeyError::UnknownCacheKey(cache_key)) => {
+                trace!(
+                    %cache_key,
+                    "unsupported cache update, skipping"
+                );
+            }
+            Ok(cache_key) => {
+                debug!(%cache_key, "cache update");
+                let value = caching::get_serialized_caching_value(
+                    &key_value_store,
+                    &cache_key,
+                )
+                .await;
+
+                if let Some(value) = value {
+                    state.cache.0.write().unwrap().insert(cache_key, value);
+                } else {
+                    warn!(%cache_key, 
+                    "got a message to update our served cache, but DB had no valid to give");
+                }
+            }
+        }
+    }
+}
+
+pub async fn update_cache_from_notifications(
+    state: Arc<State>,
+    db_pool: &PgPool,
+) -> JoinHandle<()> {
+    let db_url = format!(
+        "{}?application_name={}",
+        ENV_CONFIG.db_url, "serve-rs-cache-update"
+    );
+
+    let mut listener =
+        sqlx::postgres::PgListener::connect(&db_url).await.unwrap();
+    listener.listen("cache-update").await.unwrap();
+    debug!("listening for cache updates");
+
+    let notification_stream = listener.into_stream();
+    let key_value_store = KeyValueStorePostgres::new(db_pool.clone());
+
+    tokio::spawn(async move {
+        process_notifications(notification_stream, state, key_value_store)
+            .await;
+    })
+}
+
 lazy_static! {
     static ref SIX_SECONDS: Duration = Duration::seconds(6);
     static ref TWO_MINUTES: Duration = Duration::seconds(120);
@@ -203,6 +263,8 @@ mod test {
     }
 
     use chrono::Utc;
+    use futures::channel;
+    use tokio::sync::mpsc;
 
     // in this test case, we test the logic of cached_get this funciton which is implemented to retrive data
     // from memory hash cache and wrap return value into http response message
@@ -249,6 +311,21 @@ mod test {
             id: 1,
             key_content: key_str.to_string(),
             content: format!("content field content {}", key_str.to_string()),
+        }
+    }
+
+    // here we create a MockPgNotificaiton which mocks the PgNotificaiton
+    struct MockPgNotification {
+        channel: String,
+        payload: String,
+    }
+
+    impl MockPgNotification {
+        fn new(channel: &str, payload: &str) -> Self {
+            MockPgNotification {
+                channel: channel.to_string(),
+                payload: payload.to_string(),
+            }
         }
     }
 }
