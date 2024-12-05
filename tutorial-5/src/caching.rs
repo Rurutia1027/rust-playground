@@ -157,17 +157,19 @@ mod tests {
         // so we invoke .await here
         key_value_store
             .set_serializable_value(
-                &CacheKey::EthPrice.to_db_key(),
+                &CacheKey::AverageEthPrice.to_db_key(),
                 &test_json_obj,
             )
             .await;
 
         // after the previous async function executed, here we try to extract the value by the given key here
         // to verify whether the save&serialized function and query&deserialized function works as expected.
-        let raw_value: Value =
-            get_serialized_caching_value(&key_value_store, &CacheKey::EthPrice)
-                .await
-                .unwrap();
+        let raw_value: Value = get_serialized_caching_value(
+            &key_value_store,
+            &CacheKey::AverageEthPrice,
+        )
+        .await
+        .unwrap();
         let query_value = serde_json::to_value(test_json_obj).unwrap();
         println!("raw_value: {:?}, query_value: {:?}", raw_value, query_value);
         assert_eq!(query_value, raw_value);
@@ -197,7 +199,7 @@ mod tests {
             "cache_value: {:?}, test_json_item: {:?}",
             caching_value, test_json_item
         );
-        // assert_eq!(caching_value, test_json_item);
+        assert_eq!(caching_value, test_json_item);
 
         Ok(())
     }
