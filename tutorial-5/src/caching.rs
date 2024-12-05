@@ -1,8 +1,8 @@
-use anyhow::{Context, Error, Result};
+use anyhow::Result;
 use enum_iterator::Sequence;
 use serde::Serialize;
 use serde_json::Value;
-use sqlx::{PgExecutor, PgPool};
+use sqlx::PgExecutor;
 use std::{fmt::Display, str::FromStr};
 use thiserror::Error;
 use tracing::debug;
