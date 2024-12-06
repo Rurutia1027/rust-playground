@@ -5,6 +5,7 @@ pub mod health;
 pub mod key_value_store;
 pub mod mockservices;
 pub mod serve;
+pub mod units;
 
 pub fn init_tracing() {
     tracing_subscriber::fmt()
