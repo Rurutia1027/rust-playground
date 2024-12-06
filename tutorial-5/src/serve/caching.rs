@@ -263,8 +263,6 @@ mod test {
     }
 
     use chrono::Utc;
-    use futures::channel;
-    use tokio::sync::mpsc;
 
     // in this test case, we test the logic of cached_get this funciton which is implemented to retrive data
     // from memory hash cache and wrap return value into http response message
@@ -311,21 +309,6 @@ mod test {
             id: 1,
             key_content: key_str.to_string(),
             content: format!("content field content {}", key_str.to_string()),
-        }
-    }
-
-    // here we create a MockPgNotificaiton which mocks the PgNotificaiton
-    struct MockPgNotification {
-        channel: String,
-        payload: String,
-    }
-
-    impl MockPgNotification {
-        fn new(channel: &str, payload: &str) -> Self {
-            MockPgNotification {
-                channel: channel.to_string(),
-                payload: payload.to_string(),
-            }
         }
     }
 }
