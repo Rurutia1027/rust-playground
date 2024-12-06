@@ -98,7 +98,12 @@ mod tests {
         };
 
         let EthNewType(sum_value) = item1.add(item2);
-        assert_eq!((29484.937434 as f64 + 2445.284634 as f64), sum_value)
+        assert_eq!((29484.937434 as f64 + 2445.284634 as f64), sum_value);
+
+        assert_eq!(
+            item1 + item2,
+            EthNewType(29484.937434 as f64 + 2445.284634 as f64)
+        );
     }
 
     #[test]
@@ -115,6 +120,10 @@ mod tests {
 
         let EthNewType(sub_value) = item2.sub(item1);
         assert_eq!(sub_value, item2.0 - item1.0);
+        assert_eq!(
+            EthNewType(29484.937434 as f64) - EthNewType(2445.284634 as f64),
+            EthNewType(29484.937434 as f64 - 2445.284634 as f64)
+        );
     }
 
     #[test]
