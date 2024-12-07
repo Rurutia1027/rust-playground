@@ -1,3 +1,21 @@
+# Understand Beacon(as in Beacon Chain)
+
+The **Beacon Chain** is the core chain of Ethereum's **proof-of-stake(PoS)** network. It manages and coordinates validators, staking and consensus. Unlike the older **proof-of-work (PoW)** chain, the Beacon Chain does not handle user transactions or smart contracts; instead it focuse on:
+
+- Validating blocks.
+- Ensuring the integrity of the network.
+- Managing validator roles and rewards.
+
+Take the Beacon Chain as the **brain** of Ethereum's **PoS** system, orchestrating the entire blockchain.
+
+# Understand Withdrawals
+
+In the Ethereum **PoS** contex, **withdrawals** refer to the proces of withdrawing funds from a validator account. Validators are participants who stake ETH to secure the network. Over time, they may wish to:
+
+- Withdraw **staking rewards** earned for validating transactions.
+
+- Fully exit and withdraw their entire staked ETH. 
+
 # Understand ERC-20 Token Standard
 
 ERC-20 is a **fungible token standard** on the Etherum blockchain. Tokens created using ERC-20 are interchangeable, meaning each token is identical to another. This standard defines six mandatory functions (e.g., transfer, balanceOf) and optional metadata(e.g., name, symbol). ERC-20 simplifies token creation, enables interoprability, and is widely used for cryptocurrencies, utility tokens, and stablecoins.

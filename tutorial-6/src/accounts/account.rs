@@ -202,11 +202,100 @@ pub async fn get_internal_transactions_via_transaction_hash(
     Ok(response)
 }
 
+pub async fn get_internal_transactions_via_block_range(
+    start_block_number: i32,
+    end_block_number: i32,
+    api_key: &str,
+) -> Result<InternalTransctionsResponse, reqwest::Error> {
+    let client = Client::new();
+    let url = format!(
+        "https://api.etherscan.io/api?module=account&action=txlistinternal&startblock={}&endblock={}&page=1&offset=10&sort=asc&apikey={}",
+        start_block_number, end_block_number, api_key
+    );
+
+    // validate block range  number values
+    assert!(
+        start_block_number >= 0
+            && end_block_number >= 0
+            && start_block_number < end_block_number
+    );
+
+    let response = client
+        .get(&url)
+        .send()
+        .await?
+        .json::<InternalTransctionsResponse>()
+        .await?;
+
+    Ok(response)
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct BlockResponse {
+    status: String,
+    message: String,
+    result: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct Block {
+    blockNumber: String,
+    timeStamp: String,
+    blockReward: String,
+}
+
+pub async fn get_blocks_via_address(
+    address: &str,
+    api_key: &str,
+) -> Result<BlockResponse, reqwest::Error> {
+    let client = Client::new();
+    let url = format!("https://api.etherscan.io/api?module=account&action=getminedblocks&address={}&blocktype=blocks&page=1&offset=10&apikey={}", address, api_key);
+
+    let response = client
+        .get(&url)
+        .send()
+        .await?
+        .json::<BlockResponse>()
+        .await?;
+    Ok(response)
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct BeaconChainWithdrawal {
+    withdrawalIndex: String,
+    validatorIndex: String,
+    address: String,
+    amount: String,
+    blockNumber: String,
+    timestamp: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct BeaconChainWithdrawalsResponse {
+    status: String,
+    message: String,
+    result: Vec<BeaconChainWithdrawal>,
+}
+
+pub async fn get_beacon_chain_withdrawals_via_address_and_block_range(
+    address: &str,
+    api_key: &str,
+) -> Result<BeaconChainWithdrawalsResponse, reqwest::Error> {
+    let client = Client::new();
+    let url = format!("https://api.etherscan.io/api?module=account&action=txsBeaconWithdrawal&address={}&startblock=0&endblock=99999999&page=1&offset=100&sort=asc&apikey={}", address, api_key);
+    let response = client
+        .get(&url)
+        .send()
+        .await?
+        .json::<BeaconChainWithdrawalsResponse>()
+        .await?;
+    Ok(response)
+}
+
 #[cfg(test)]
 mod tests {
-    use anyhow::Context;
-
     use super::*;
+    use anyhow::Context;
 
     #[tokio::test]
     async fn test_query_ehther_balance() {
@@ -243,8 +332,6 @@ mod tests {
         for res in res_vec {
             println!("account: {}, balance: {}", res.account, res.balance);
         }
-
-        println!("ret content: {:?}", ret);
     }
 
     #[tokio::test]
@@ -348,5 +435,79 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[tokio::test]
+    async fn test_internal_transactions_via_block_range() {
+        let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
+        let start_block = 13481773;
+        let end_block = 13491773;
+        let response = get_internal_transactions_via_block_range(
+            start_block,
+            end_block,
+            &api_key,
+        )
+        .await
+        .context(
+            "Failed to query internal transaction via given block value range",
+        )
+        .unwrap();
+
+        assert_eq!(response.status, "1");
+        assert_eq!(response.message, "OK");
+        let trans_vec = &response.result;
+        for trans in trans_vec {
+            let trans_json_str = serde_json::to_string(&trans).unwrap();
+            let trans_json_value: serde_json::Value =
+                serde_json::from_str(&trans_json_str).unwrap();
+
+            if let serde_json::Value::Object(map) = trans_json_value {
+                for (_, v) in map.iter() {
+                    assert!(!v.is_null());
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_query_blocks_via_address() {
+        let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
+        let address = "0x9dd134d14d1e65f84b706d6f205cd5b1cd03a46b".to_string();
+        let response = get_blocks_via_address(&address, &api_key)
+            .await
+            .context("Failed to query blocks via given address")
+            .unwrap();
+        assert_eq!(response.message, "OK");
+        assert_eq!(response.status, "1");
+
+        let block_vec = &response.result;
+        for block in block_vec {
+            let block_json_str = serde_json::to_string(&block).unwrap();
+            let block_json_value: serde_json::Value =
+                serde_json::from_str(&block_json_str).unwrap();
+            if let serde_json::Value::Object(map) = block_json_value {
+                for (_, v) in map.iter() {
+                    assert!(!v.is_null());
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_query_from_beacon_chain() {
+        let address = "0xB9D7934878B5FB9610B3fE8A5e441e8fad7E293f".to_string();
+        let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
+        let res = get_beacon_chain_withdrawals_via_address_and_block_range(
+            &address, &api_key,
+        )
+        .await
+        .context("Failed to retrieve withdrawal from beacon chain by given block range and address")
+        .unwrap();
+
+        assert_eq!(res.message, "OK");
+        assert_eq!(res.status, "1");
+        let withdraw_vec = &res.result;
+
+        assert!(withdraw_vec.len() > 0);
     }
 }
