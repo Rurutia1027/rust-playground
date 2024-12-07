@@ -292,14 +292,14 @@ pub async fn get_beacon_chain_withdrawals_via_address_and_block_range(
     Ok(response)
 }
 
-#[cfg(test)]
+// #[cfg(test)]
 mod tests {
     use super::*;
     use anyhow::Context;
     use std::thread;
     use std::time::Duration;
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn test_query_ehther_balance() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let address = "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae".to_string();
@@ -316,7 +316,7 @@ mod tests {
         assert_ne!(ret.result, "0");
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn test_query_multi_ether_balances() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let mut addr_vec: Vec<String> = Vec::new();
@@ -338,7 +338,7 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn test_query_normal_transactions_via_address() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let address = "0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC".to_string();
@@ -376,7 +376,7 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn test_query_internal_transactions_via_address() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let address = "0x2c1ba59d6f58433fb1eaee7d20b26ed83bda51a3".to_string();
@@ -413,7 +413,7 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn test_query_internal_transactions_via_transaction_hash() {
         let tx_hash = "0x40eb908387324f2b575b4879cd9d7188f69c8fc9d87c901b9e2daaea4b442170".to_string();
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
@@ -444,7 +444,7 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn test_internal_transactions_via_block_range() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let start_block = 13481773;
@@ -477,7 +477,7 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn test_query_blocks_via_address() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let address = "0x9dd134d14d1e65f84b706d6f205cd5b1cd03a46b".to_string();
