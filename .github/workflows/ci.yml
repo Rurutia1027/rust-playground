@@ -93,4 +93,4 @@ jobs:
           echo "cargo build"
           cargo build --verbose 
           echo "cargo test"
-          cargo test --verbose -- ----nocapture
+          cargo test --verbose -- --nocapture
