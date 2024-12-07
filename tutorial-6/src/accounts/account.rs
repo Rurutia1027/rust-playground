@@ -296,12 +296,15 @@ pub async fn get_beacon_chain_withdrawals_via_address_and_block_range(
 mod tests {
     use super::*;
     use anyhow::Context;
+    use std::thread;
+    use std::time::Duration;
 
     #[tokio::test]
     async fn test_query_ehther_balance() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let address = "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae".to_string();
 
+        thread::sleep(Duration::from_millis(200));
         let ret = get_ether_balance(&address, &api_key).await.context(
             "Failed to get response body from etherscan endopoint account api ",
         ).unwrap();
@@ -323,6 +326,7 @@ mod tests {
         addr_vec.push("0x198ef1ec325a96cc354c7266a038be8b5c558f67".to_owned());
         addr_vec.push("0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae".to_owned());
 
+        thread::sleep(Duration::from_millis(200));
         let ret = get_ether_balances(&addr_vec, &api_key)
             .await
             .context("Unable to get response from multiple balance query API endpoint")
@@ -339,6 +343,7 @@ mod tests {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let address = "0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC".to_string();
 
+        thread::sleep(Duration::from_millis(200));
         let ret = get_normal_transaction_via_address(&address, &api_key)
             .await
             .context(
@@ -375,6 +380,7 @@ mod tests {
     async fn test_query_internal_transactions_via_address() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let address = "0x2c1ba59d6f58433fb1eaee7d20b26ed83bda51a3".to_string();
+        thread::sleep(Duration::from_millis(200));
         let response =
             get_internal_transactions_via_address(&address, &api_key)
                 .await
@@ -411,6 +417,7 @@ mod tests {
     async fn test_query_internal_transactions_via_transaction_hash() {
         let tx_hash = "0x40eb908387324f2b575b4879cd9d7188f69c8fc9d87c901b9e2daaea4b442170".to_string();
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
+        thread::sleep(Duration::from_millis(200));
         let response = get_internal_transactions_via_transaction_hash(
             &tx_hash, &api_key,
         )
@@ -442,6 +449,7 @@ mod tests {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let start_block = 13481773;
         let end_block = 13491773;
+        thread::sleep(Duration::from_millis(200));
         let response = get_internal_transactions_via_block_range(
             start_block,
             end_block,
@@ -473,6 +481,7 @@ mod tests {
     async fn test_query_blocks_via_address() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let address = "0x9dd134d14d1e65f84b706d6f205cd5b1cd03a46b".to_string();
+        thread::sleep(Duration::from_millis(200));
         let response = get_blocks_via_address(&address, &api_key)
             .await
             .context("Failed to query blocks via given address")
@@ -495,8 +504,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_from_beacon_chain() {
+        thread::sleep(Duration::from_millis(200));
         let address = "0xB9D7934878B5FB9610B3fE8A5e441e8fad7E293f".to_string();
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
+        thread::sleep(Duration::from_millis(200));
         let res = get_beacon_chain_withdrawals_via_address_and_block_range(
             &address, &api_key,
         )
