@@ -1,3 +1,5 @@
+use std::ptr::addr_eq;
+
 /// NOTE: etherscan api-endpoints of account: https://docs.etherscan.io/api-endpoints/accounts
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -111,10 +113,56 @@ pub async fn get_normal_transaction_via_address(
     Ok(response)
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct InternalTransction {
+    blockNumber: String,
+    timeStamp: String,
+    hash: String,
+    from: String,
+    to: String,
+    contractAddress: String,
+    input: String,
+    #[serde(rename = "type")]
+    type_str: String,
+    gas: String,
+    gasUsed: String,
+    traceId: String,
+    isError: String,
+    errCode: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct InternalTransctionsResponse {
+    status: String,
+    message: String,
+    result: Vec<InternalTransction>,
+}
+
+pub async fn get_internal_transactions_via_address(
+    address: &str,
+    api_key: &str,
+) -> Result<InternalTransctionsResponse, reqwest::Error> {
+    let client = Client::new();
+    let url = format!(
+        "https://api.etherscan.io/api?module=account&action=txlistinternal&address={}&startblock=0&endblock=2702578&page=1&offset=10&sort=asc&apikey={}",
+        address, api_key
+    );
+
+    println!("internal transaction addr {}", &url);
+
+    let response = client
+        .get(&url)
+        .send()
+        .await?
+        .json::<InternalTransctionsResponse>()
+        .await?;
+    // println!("internal transaction response : {:?}", response);
+    Ok(response)
+}
+
 #[cfg(test)]
 mod tests {
     use anyhow::Context;
-    use serde::de::value;
 
     use super::*;
 
@@ -180,15 +228,50 @@ mod tests {
             let trans_json_str =
                 serde_json::to_string(&normal_transaction).unwrap();
 
-            // then converted the serde json string into serde json value instance 
+            // then converted the serde json string into serde json value instance
             let trans_json_value: serde_json::Value =
                 serde_json::from_str(&trans_json_str).unwrap();
 
-            // then try to covnert the serde json object's key, value pairs and traverse each key's corresponding value 
+            // then try to covnert the serde json object's key, value pairs and traverse each key's corresponding value
             if let serde_json::Value::Object(map) = trans_json_value {
                 for (k, v) in map.iter() {
-
                     // then verify the value should not be null
+                    assert!(!v.is_null());
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_query_internal_transactions_via_address() {
+        let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
+        let address = "0x2c1ba59d6f58433fb1eaee7d20b26ed83bda51a3".to_string();
+        let response =
+            get_internal_transactions_via_address(&address, &api_key)
+                .await
+                .context(
+                    "Failed to query internal transactions via given address",
+                )
+                .unwrap();
+        // println!("response content for internal transaciton: {:?}", response);
+        assert_eq!(response.status, "1");
+        assert_eq!(response.message, "OK");
+
+        // here we traverse each item in response#result
+        // and verify each content is not null
+        let internal_transation_vec = &response.result;
+        for internal_transaction in internal_transation_vec {
+            // convert item into string
+            let trans_json_str =
+                serde_json::to_string(&internal_transaction).unwrap();
+
+            // convert json string into serde json object
+            let trans_json_obj: serde_json::Value =
+                serde_json::from_str(&trans_json_str).unwrap();
+
+            // extract key in json and traverse and fetch each value
+            if let serde_json::Value::Object(map) = trans_json_obj {
+                for (k, v) in map.iter() {
                     assert!(!v.is_null());
                 }
             }
