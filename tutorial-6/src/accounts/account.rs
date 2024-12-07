@@ -63,9 +63,58 @@ pub async fn get_ether_balances(
     Ok(response)
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+struct NormalTransaction {
+    blockNumber: String,
+    timeStamp: String,
+    hash: String,
+    nonce: String,
+    blockHash: String,
+    transactionIndex: String,
+    from: String,
+    to: String,
+    value: String,
+    gas: String,
+    gasPrice: String,
+    isError: String,
+    txreceipt_status: String,
+    input: String,
+    contractAddress: String,
+    cumulativeGasUsed: String,
+    gasUsed: String,
+    confirmations: String,
+    methodId: String,
+    functionName: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+struct NormalTransactionsResponse {
+    status: String,
+    message: String,
+    result: Vec<NormalTransaction>,
+}
+
+pub async fn get_normal_transaction_via_address(
+    address: &str,
+    api_key: &str,
+) -> Result<NormalTransactionsResponse, reqwest::Error> {
+    let client = Client::new();
+    let url = format!(
+        "https://api.etherscan.io/api?module=account&action=txlist&address={}&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey={}",
+            address, api_key);
+    let response = client
+        .get(&url)
+        .send()
+        .await?
+        .json::<NormalTransactionsResponse>()
+        .await?;
+    Ok(response)
+}
+
 #[cfg(test)]
 mod tests {
     use anyhow::Context;
+    use serde::de::value;
 
     use super::*;
 
@@ -106,5 +155,43 @@ mod tests {
         }
 
         println!("ret content: {:?}", ret);
+    }
+
+    #[tokio::test]
+    async fn test_query_normal_transactions_via_address() {
+        let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
+        let address = "0xc5102fE9359FD9a28f877a67E36B0F050d81a3CC".to_string();
+
+        let ret = get_normal_transaction_via_address(&address, &api_key)
+            .await
+            .context(
+                "Failed to get response from normal transaction query endpoint",
+            )
+            .unwrap();
+        //println!("normal trans ret {:?}", ret);
+        assert_eq!(ret.status, "1");
+        assert_eq!(ret.message, "OK");
+
+        let normal_trans_vec = &ret.result;
+        for normal_transaction in normal_trans_vec {
+            // println!("Normal Transaction {:?}", normal_transaction);
+
+            // first we converted the struct object instance into json string via serde_json
+            let trans_json_str =
+                serde_json::to_string(&normal_transaction).unwrap();
+
+            // then converted the serde json string into serde json value instance 
+            let trans_json_value: serde_json::Value =
+                serde_json::from_str(&trans_json_str).unwrap();
+
+            // then try to covnert the serde json object's key, value pairs and traverse each key's corresponding value 
+            if let serde_json::Value::Object(map) = trans_json_value {
+                for (k, v) in map.iter() {
+
+                    // then verify the value should not be null
+                    assert!(!v.is_null());
+                }
+            }
+        }
     }
 }
