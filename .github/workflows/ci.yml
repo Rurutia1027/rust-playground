@@ -87,3 +87,10 @@ jobs:
           
           echo "begin cargo test in tutorial-5"
           cargo test --verbose -- --nocapture
+      - name: Build and Test tutorial-6
+        working-directory: ./tutorial-6
+        run: |
+          echo "cargo build"
+          cargo build --verbose 
+          echo "cargo test"
+          cargo test --verbose -- --nocapture
