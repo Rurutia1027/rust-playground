@@ -3,7 +3,6 @@ use std::ptr::addr_eq;
 /// NOTE: etherscan api-endpoints of account: https://docs.etherscan.io/api-endpoints/accounts
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 
 #[derive(Deserialize, Debug)]
 struct SingleBalanceResponse {
@@ -148,7 +147,7 @@ pub async fn get_internal_transactions_via_address(
         address, api_key
     );
 
-    println!("internal transaction addr {}", &url);
+    // println!("internal transaction addr {}", &url);
 
     let response = client
         .get(&url)
@@ -157,6 +156,49 @@ pub async fn get_internal_transactions_via_address(
         .json::<InternalTransctionsResponse>()
         .await?;
     // println!("internal transaction response : {:?}", response);
+    Ok(response)
+}
+
+// --
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct InternalTransctionV2 {
+    blockNumber: String,
+    timeStamp: String,
+    from: String,
+    to: String,
+    value: String,
+    contractAddress: String,
+    input: String,
+    #[serde(rename = "type")]
+    type_str: String,
+    gas: String,
+    gasUsed: String,
+    isError: String,
+    errCode: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct InternalTransctionsResponseV2 {
+    status: String,
+    message: String,
+    result: Vec<InternalTransctionV2>,
+}
+
+pub async fn get_internal_transactions_via_transaction_hash(
+    transaction_hash: &str,
+    api_key: &str,
+) -> Result<InternalTransctionsResponseV2, reqwest::Error> {
+    let client = Client::new();
+    let url = format!(
+        "https://api.etherscan.io/api?module=account&action=txlistinternal&txhash={}&apikey={}", transaction_hash, api_key);
+
+    let response = client
+        .get(&url)
+        .send()
+        .await?
+        .json::<InternalTransctionsResponseV2>()
+        .await?;
+
     Ok(response)
 }
 
@@ -272,6 +314,36 @@ mod tests {
             // extract key in json and traverse and fetch each value
             if let serde_json::Value::Object(map) = trans_json_obj {
                 for (k, v) in map.iter() {
+                    assert!(!v.is_null());
+                }
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_query_internal_transactions_via_transaction_hash() {
+        let tx_hash = "0x40eb908387324f2b575b4879cd9d7188f69c8fc9d87c901b9e2daaea4b442170".to_string();
+        let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
+        let response = get_internal_transactions_via_transaction_hash(
+            &tx_hash, &api_key,
+        )
+        .await
+        .context(
+            "Failed to query internal transctions by given transaction hash",
+        )
+        .unwrap();
+
+        assert_eq!(response.status, "1");
+        assert_eq!(response.message, "OK");
+
+        let trans_vec = &response.result;
+        for trans in trans_vec {
+            let trans_json_str = serde_json::to_string(&trans).unwrap();
+            let trans_json_value: serde_json::Value =
+                serde_json::from_str(&trans_json_str).unwrap();
+
+            if let serde_json::Value::Object(map) = trans_json_value {
+                for (_, v) in map.iter() {
                     assert!(!v.is_null());
                 }
             }
