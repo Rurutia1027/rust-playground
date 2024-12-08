@@ -153,25 +153,25 @@ impl ERC20 {
 
   // Transfer tokens on behalf of an owner
   fn transfer_from(&mut self, owner: &str, spender: &str, to: &str, amount: u256) -> Result<(), String> {
-    let allowance = self.allowance(owner, spender); 
+    let allowance = self.allowance(owner, spender);
 
     if allowance < amount {
-      return Err("Allowance exceeded".into()); 
+      return Err("Allowance exceeded".into());
     }
 
-    let owner_balance = self.balances.get(owner).cloned().unwrap_or(0); 
+    let owner_balance = self.balances.get(owner).cloned().unwrap_or(0);
 
     if owner_balance < amount {
-      return Err("Insufficient balance".into()); 
+      return Err("Insufficient balance".into());
     }
 
-    // Deduct from allowance and owner balance 
-    self.allowances.get_mut(owner).unwrap().insert(spender.into(), allowance - amount); 
-    self.balances.insert(owner.into(), owner_balance - amount); 
+    // Deduct from allowance and owner balance
+    self.allowances.get_mut(owner).unwrap().insert(spender.into(), allowance - amount);
+    self.balances.insert(owner.into(), owner_balance - amount);
 
-    // Add to recipient balance 
-    let to_balance = self.balances.get(to).cloned().unwrap_or(0); 
-    self.balances.insert(to.into() , to_balance + amount); 
+    // Add to recipient balance
+    let to_balance = self.balances.get(to).cloned().unwrap_or(0);
+    self.balances.insert(to.into() , to_balance + amount);
     Ok(())
   }
 
@@ -179,6 +179,13 @@ impl ERC20 {
 ```
 
 ### Total Supply
+
+In Solidity, the total supply is a single `uint256`. In Rust, it can be simple field:
+
+```rust
+
+struct ERC20 
+```
 
 ### Putting It All Together
 
