@@ -183,8 +183,17 @@ impl ERC20 {
 In Solidity, the total supply is a single `uint256`. In Rust, it can be simple field:
 
 ```rust
+struct ERC20 {
+  balances: HashMap<String, u256>,
+  total_supply: u256
+}
 
-struct ERC20 
+impl ERC20 {
+  // get the total supply of the token
+  fn total_supply(&self) -> u256 {
+    self.total_supply
+  }
+}
 ```
 
 ### Putting It All Together
