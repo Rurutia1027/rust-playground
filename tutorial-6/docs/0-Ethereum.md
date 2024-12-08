@@ -196,12 +196,6 @@ impl ERC20 {
 }
 ```
 
-### Putting It All Together
-
-### How [Etherscan](https://etherscan.io/myapikey) Relates?
-
-## Problems Ethereumers Face Before ERC-20 was Innovated
-
 # Understand ERC-721 Token Standard
 
 ERC-721 is a **non-fungible token standard** that allow for creating unique and indivisible tokens. Unlike ERC-20, ERC-721 tokens each have a unique identifier(**tokenId**) and cannot be exchanged on a one-to-one baisis. This standard is commonly used for digital collectibles, gaming items, and tokenized real-world assets. Its uniqueness has revolutionized ownership and provenance in the digital realm.
