@@ -1,5 +1,3 @@
-use std::ptr::addr_eq;
-
 use chrono::{DateTime, Utc};
 /// NOTE: etherscan api-endpoints of account: https://docs.etherscan.io/api-endpoints/accounts
 use reqwest::Client;
