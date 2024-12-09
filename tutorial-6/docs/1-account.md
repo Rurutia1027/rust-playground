@@ -1,83 +1,3 @@
-# Transactions
-
-## Introduction
-
-A **transaction** in blockchain is a digital operation that modifies the state of the blockchain. Transactions can transfer assets, invoke smart contract functions, or manage blockchain governance. Each transaction is cryptographically signed by the sender to ensure authenticity.
-
-## Key Features
-
-- **Immutable**: Once added to a block and confirmed, transactions cannot be altered.
-- **Transparent**: Public blockchains like Etherum allows anyone to view the details of a transaction.
-- **Secure**: Transactions are secured via cryptographic techniques like digital signatures.
-- **Atomic**: They either succeed entirely or fail(reverting the changes).
-
-## Normal Transactions
-
-**Definition**: These are transactions initiated by an **externally owned account(EOA)** (a user account controlled by a private key) directly on the Ethereum blockchain.
-**Execution**: They involve transferring Ether or calling a smart contract function direclty .
-**Gas Payment**: Gas fees are explicitly paid by the sender (the user initiating the transaction).
-**Characters**:
-
-- Always recorded on-chain as part of the Ethereum transaction pool.
-- Can send Ether or invoke smart contract functions.
-- Includes fields like from, to, value, gas, gasPrice, and data(if interacting with a contract).
-
-**Example Use Case**:
-
-- Sending 1 Ether from your wallet to a friend's wallet.
-- Invoking a function on smart contract, e.g., swapping tokens on a decentialized exchange.
-
-## Internal Transaction
-
-**Definition**: These are transactions **triggered by smart contract execution**, not directly initiated by a user account.
-**Execution**: Internal transactions occur within **a smart contract** as a result of another transaction. For example:
-
-- A smart contract transfers Ether to another account.
-- A contact calls another contract.
-
-**Gas Payment**: Gas is still paid by the **external transactions** that initiated the contract interaction.
-
-**Characteristics**:
-
-- Not directly recorded as a transaction on-chain but instead as part of the **execution trace** of the initiating transaction.
-- Can invoke value transfers or calls betwen contracts.
-- Require analyzing the transaction trace to detect.
-
-**Example Use Case**:
-
-- A smart contract sends Ether to a beneficiary after receiving funds(e.g., splitting payments between users).
-- A contract-to-contract interaciton (e.g., invoking another contract's function).
-
-## Normal Transactions vs. Internal Transactions
-
-### Normal Transactions
-
-- From: always from EOA, User Wallet Address.
-- To: another EOA, or Smart Contract
-- Transactions data are always recorded on chain.
-
-### Internal Transactions
-
-- From: either {EOA, Smart Contract X}
-- To: either {Another Smart Contract Y, EOA}
-- Internal transactions are part of the `execution trace` of a parent transaction.
-- They are **not explicitly recorded on-chain**
-- More complex of the internal transactions we say, is becuase they often involves series of **nested calls**, like:
-  > Transfers between multiple contracts.
-  > Auto-modificaiton of token balances or contract state.
-
-| **Feature**           | **Normal Transactions**        | **Internal Transactions**                       |
-| --------------------- | ------------------------------ | ----------------------------------------------- |
-| **Initiated By**      | Externally owned account (EOA) | Smart contract                                  |
-| **Recorded On-Chain** | Yes                            | No (part of execution trace)                    |
-| **Gas Fees**          | Paid by the sender             | Paid by the initiator of the parent transaction |
-| **Initiated By**      | EOA (User Wallet)              | Smart Contract or indirectly by an EOA          |
-| **From/To**           | EOA to EOA, EOA to Contract    | Smart Contract or Indirectly by an EOA          |
-| **Visibility**        | Directly visible on-chain      | Requires tracing tools like Etherscan           |
-| **Complexity**        | Simple, direct                 | Complex, involves nested calls and interactions |
-
----
-
 # Account API Endpoints in [etherscan.io](https://docs.etherscan.io/api-endpoints/accounts)
 
 ## Get Ether Balance for a Single Address
@@ -637,3 +557,79 @@ https://api.etherscan.io/api
    ]
 }
 ```
+
+## Introduction
+
+A **transaction** in blockchain is a digital operation that modifies the state of the blockchain. Transactions can transfer assets, invoke smart contract functions, or manage blockchain governance. Each transaction is cryptographically signed by the sender to ensure authenticity.
+
+## Key Features
+
+- **Immutable**: Once added to a block and confirmed, transactions cannot be altered.
+- **Transparent**: Public blockchains like Etherum allows anyone to view the details of a transaction.
+- **Secure**: Transactions are secured via cryptographic techniques like digital signatures.
+- **Atomic**: They either succeed entirely or fail(reverting the changes).
+
+## Normal Transactions
+
+**Definition**: These are transactions initiated by an **externally owned account(EOA)** (a user account controlled by a private key) directly on the Ethereum blockchain.
+**Execution**: They involve transferring Ether or calling a smart contract function direclty .
+**Gas Payment**: Gas fees are explicitly paid by the sender (the user initiating the transaction).
+**Characters**:
+
+- Always recorded on-chain as part of the Ethereum transaction pool.
+- Can send Ether or invoke smart contract functions.
+- Includes fields like from, to, value, gas, gasPrice, and data(if interacting with a contract).
+
+**Example Use Case**:
+
+- Sending 1 Ether from your wallet to a friend's wallet.
+- Invoking a function on smart contract, e.g., swapping tokens on a decentialized exchange.
+
+## Internal Transaction
+
+**Definition**: These are transactions **triggered by smart contract execution**, not directly initiated by a user account.
+**Execution**: Internal transactions occur within **a smart contract** as a result of another transaction. For example:
+
+- A smart contract transfers Ether to another account.
+- A contact calls another contract.
+
+**Gas Payment**: Gas is still paid by the **external transactions** that initiated the contract interaction.
+
+**Characteristics**:
+
+- Not directly recorded as a transaction on-chain but instead as part of the **execution trace** of the initiating transaction.
+- Can invoke value transfers or calls betwen contracts.
+- Require analyzing the transaction trace to detect.
+
+**Example Use Case**:
+
+- A smart contract sends Ether to a beneficiary after receiving funds(e.g., splitting payments between users).
+- A contract-to-contract interaciton (e.g., invoking another contract's function).
+
+## Normal Transactions vs. Internal Transactions
+
+### Normal Transactions
+
+- From: always from EOA, User Wallet Address.
+- To: another EOA, or Smart Contract
+- Transactions data are always recorded on chain.
+
+### Internal Transactions
+
+- From: either {EOA, Smart Contract X}
+- To: either {Another Smart Contract Y, EOA}
+- Internal transactions are part of the `execution trace` of a parent transaction.
+- They are **not explicitly recorded on-chain**
+- More complex of the internal transactions we say, is becuase they often involves series of **nested calls**, like:
+  > Transfers between multiple contracts.
+  > Auto-modificaiton of token balances or contract state.
+
+| **Feature**           | **Normal Transactions**        | **Internal Transactions**                       |
+| --------------------- | ------------------------------ | ----------------------------------------------- |
+| **Initiated By**      | Externally owned account (EOA) | Smart contract                                  |
+| **Recorded On-Chain** | Yes                            | No (part of execution trace)                    |
+| **Gas Fees**          | Paid by the sender             | Paid by the initiator of the parent transaction |
+| **Initiated By**      | EOA (User Wallet)              | Smart Contract or indirectly by an EOA          |
+| **From/To**           | EOA to EOA, EOA to Contract    | Smart Contract or Indirectly by an EOA          |
+| **Visibility**        | Directly visible on-chain      | Requires tracing tools like Etherscan           |
+| **Complexity**        | Simple, direct                 | Complex, involves nested calls and interactions |
