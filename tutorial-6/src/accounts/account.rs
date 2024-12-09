@@ -1,5 +1,6 @@
 use std::ptr::addr_eq;
 
+use chrono::{DateTime, Utc};
 /// NOTE: etherscan api-endpoints of account: https://docs.etherscan.io/api-endpoints/accounts
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -291,13 +292,116 @@ pub async fn get_beacon_chain_withdrawals_via_address_and_block_range(
         .await?;
     Ok(response)
 }
+#[derive(Serialize, Deserialize, Debug)]
+struct ERC20TokenEnvelope {
+    blockNumber: String,
+    timeStamp: String,
+    hash: String,
+    nonce: String,
+    blockHash: String,
+    from: String,
+    contractAddress: String,
+    to: String,
+    value: String,
+    tokenName: String,
+    tokenSymbol: String,
+    tokenDecimal: String,
+    transactionIndex: String,
+    gas: String,
+    gasPrice: String,
+    gasUsed: String,
+    cumulativeGasUsed: String,
+    input: String,
+    confirmations: String,
+}
 
-// #[cfg(test)]
+#[derive(Debug)]
+struct ERC20Token {
+    blockNumber: String,
+    timeStamp: DateTime<Utc>,
+    hash: String,
+    from: String,
+    to: String,
+    value: String,
+    tokenName: String,
+    tokenSymbol: String,
+    tokenDemial: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ERC20TokenResponse {
+    status: String,
+    message: String,
+    result: Vec<ERC20TokenEnvelope>,
+}
+
+pub async fn get_erc_20_token_transfer_event_via_address(
+    contract_address: &str,
+    address: &str,
+    api_key: &str,
+) -> Result<ERC20TokenResponse, reqwest::Error> {
+    let client = Client::new();
+    let url = format!(
+        "https://api.etherscan.io/api?module=account&action=tokentx&contractaddress={}&address={}&page=1&offset=100&startblock=0&endblock=27025780&sort=asc&apikey={}",
+        contract_address, address, api_key
+    );
+    let response = client
+        .get(&url)
+        .send()
+        .await?
+        .json::<ERC20TokenResponse>()
+        .await?;
+
+    Ok(response)
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use anyhow::Context;
+    use chrono::TimeZone;
     use std::thread;
     use std::time::Duration;
+
+    #[tokio::test]
+    async fn test_get_erc_20_token_list() {
+        let contract_address =
+            "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2".to_string();
+        let address = "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2".to_string();
+        let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
+
+        let erc20_token_list = get_erc_20_token_transfer_event_via_address(
+            &contract_address,
+            &address,
+            &api_key,
+        )
+        .await
+        .context("Failed to retrieve ERC-20 Token List via API Endpoint")
+        .unwrap()
+        .result
+        .into_iter()
+        .map(|result| ERC20Token {
+            blockNumber: result.blockNumber,
+            timeStamp: Utc
+                .timestamp_opt(result.timeStamp.parse::<i64>().unwrap(), 0)
+                .unwrap(),
+            hash: result.hash,
+            from: result.from,
+            to: result.to,
+            value: result.value,
+            tokenName: result.tokenName,
+            tokenSymbol: result.tokenSymbol,
+            tokenDemial: result.tokenDecimal,
+        })
+        .collect::<Vec<ERC20Token>>();
+
+        assert!(erc20_token_list.len() > 0);
+
+        // traverse each token item in list
+        for erc20_token in erc20_token_list {
+            println!("token {:?}", erc20_token);
+        }
+    }
 
     // #[tokio::test]
     async fn test_query_ehther_balance() {
