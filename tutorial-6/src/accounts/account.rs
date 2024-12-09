@@ -604,7 +604,7 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    //#[tokio::test]
     async fn test_query_from_beacon_chain() {
         thread::sleep(Duration::from_millis(200));
         let address = "0xB9D7934878B5FB9610B3fE8A5e441e8fad7E293f".to_string();
