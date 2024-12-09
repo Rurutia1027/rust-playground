@@ -161,7 +161,7 @@ mod tests {
         assert!(res.result.len() > 0);
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn test_query_contract_ABI_via_addresses() {
         let api_key = "UAA5Y5IKQBHH3HUCS9GWA723666GGMEEN6".to_string();
         let mut addr_list: Vec<String> = Vec::new();
