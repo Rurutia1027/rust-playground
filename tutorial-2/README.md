@@ -27,6 +27,13 @@ java.lang.IllegalStateException: Error rendering plot, verify gnuplot is install
 Errors occurred during analysis, but no anomalies found. ಠ~ಠ
 ```
 
+---
+
+## Build the Complete System Before Executing Maelstrom Test Commands
+
+Due to the structure of the project, we need to change path to `rust-playground`, then execute the `cargo build` command.
+All compiled files are located under the `rust-playground/target` instead of current `tutorial-2/target` folder.
+
 ## Run Maelstrom Test Echo Server
 
 - [](../maelstrom_test.sh)
@@ -39,4 +46,51 @@ source ~/.bash_profile
 cargo build
 
 maelstrom test -w echo --bin ./target/debug/rustengan --node-count 1 --time-limit 10
+```
+
+---
+
+## Invoke Dist's Broadcast Service
+
+- broadcast
+
+```shell
+#!/bin/sh
+
+source ~/.bash_profile
+
+# Everything looks good! ヽ(‘ー`)ノ
+maelstrom test -w broadcast --bin ../../target/debug/broadcast --node-count 1 --time-limit 10 --rate 10
+```
+
+- multibroadcast
+
+```shell
+#!/bin/sh
+
+source ~/.bash_profile
+
+# Everything looks good! ヽ(‘ー`)ノ
+maelstrom test -w broadcast --bin ../../target/debug/multibroadcast --node-count 8 --time-limit 10 --rate 10
+```
+
+---
+
+## Invoke Dist's Unique Id Service
+
+```shell
+#!/bin/sh
+
+source ~/.bash_profile
+
+# Everything looks good! ヽ(‘ー`)ノ
+maelstrom test -w unique-ids --bin ../../target/debug/unique_id --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
+```
+
+---
+
+## Run Serde Topic Codes
+
+```shell
+cargo run --bin serdewhatnow
 ```

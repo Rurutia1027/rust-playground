@@ -1,5 +1,5 @@
 use anyhow::Context;
-use dist::{main_loop, Event, Message, Node};
+use dist::{main_loop, Event, Node};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::{StdoutLock, Write};
