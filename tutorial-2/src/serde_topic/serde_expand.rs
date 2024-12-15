@@ -3,46 +3,12 @@
 use std::prelude::rust_2021::*;
 #[macro_use]
 extern crate std;
-use serde::{Deserialize, Serialize};
+use serde::{ser::SerializeStruct, Deserialize, Serialize};
 struct Foo {
     a: u64,
+    #[serde(skip)]
     b: String,
 }
-#[doc(hidden)]
-#[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
-const _: () = {
-    #[allow(unused_extern_crates, clippy::useless_attribute)]
-    extern crate serde as _serde;
-    #[automatically_derived]
-    // here we saw a trait in which only define the standard for serialie funciton
-    // and inside of serde a bunch of serialize functions for different rust data types are defined.
-    impl _serde::Serialize for Foo {
-        fn serialize<__S>(
-            &self,
-            __serializer: __S,
-        ) -> _serde::__private::Result<__S::Ok, __S::Error>
-        where
-            __S: _serde::Serializer,
-        {
-            let mut __serde_state = _serde::Serializer::serialize_struct(
-                __serializer,
-                "Foo",
-                false as usize + 1 + 1,
-            )?;
-            _serde::ser::SerializeStruct::serialize_field(
-                &mut __serde_state,
-                "a",
-                &self.a,
-            )?;
-            _serde::ser::SerializeStruct::serialize_field(
-                &mut __serde_state,
-                "b",
-                &self.b,
-            )?;
-            _serde::ser::SerializeStruct::end(__serde_state)
-        }
-    }
-};
 #[doc(hidden)]
 #[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
 const _: () = {
@@ -60,7 +26,6 @@ const _: () = {
             #[doc(hidden)]
             enum __Field {
                 __field0,
-                __field1,
                 __ignore,
             }
             #[doc(hidden)]
@@ -85,7 +50,6 @@ const _: () = {
                 {
                     match __value {
                         0u64 => _serde::__private::Ok(__Field::__field0),
-                        1u64 => _serde::__private::Ok(__Field::__field1),
                         _ => _serde::__private::Ok(__Field::__ignore),
                     }
                 }
@@ -98,7 +62,6 @@ const _: () = {
                 {
                     match __value {
                         "a" => _serde::__private::Ok(__Field::__field0),
-                        "b" => _serde::__private::Ok(__Field::__field1),
                         _ => _serde::__private::Ok(__Field::__ignore),
                     }
                 }
@@ -111,7 +74,6 @@ const _: () = {
                 {
                     match __value {
                         b"a" => _serde::__private::Ok(__Field::__field0),
-                        b"b" => _serde::__private::Ok(__Field::__field1),
                         _ => _serde::__private::Ok(__Field::__ignore),
                     }
                 }
@@ -163,25 +125,12 @@ const _: () = {
                             return _serde::__private::Err(
                                 _serde::de::Error::invalid_length(
                                     0usize,
-                                    &"struct Foo with 2 elements",
+                                    &"struct Foo with 1 element",
                                 ),
                             );
                         }
                     };
-                    let __field1 = match _serde::de::SeqAccess::next_element::<
-                        String,
-                    >(&mut __seq)?
-                    {
-                        _serde::__private::Some(__value) => __value,
-                        _serde::__private::None => {
-                            return _serde::__private::Err(
-                                _serde::de::Error::invalid_length(
-                                    1usize,
-                                    &"struct Foo with 2 elements",
-                                ),
-                            );
-                        }
-                    };
+                    let __field1 = _serde::__private::Default::default();
                     _serde::__private::Ok(Foo {
                         a: __field0,
                         b: __field1,
@@ -197,8 +146,6 @@ const _: () = {
                 {
                     let mut __field0: _serde::__private::Option<u64> =
                         _serde::__private::None;
-                    let mut __field1: _serde::__private::Option<String> =
-                        _serde::__private::None;
                     while let _serde::__private::Some(__key) =
                         _serde::de::MapAccess::next_key::<__Field>(&mut __map)?
                     {
@@ -212,19 +159,6 @@ const _: () = {
                                 }
                                 __field0 = _serde::__private::Some(
                                     _serde::de::MapAccess::next_value::<u64>(
-                                        &mut __map,
-                                    )?,
-                                );
-                            }
-                            __Field::__field1 => {
-                                if _serde::__private::Option::is_some(&__field1)
-                                {
-                                    return _serde::__private::Err(
-                                        <__A::Error as _serde::de::Error>::duplicate_field("b"),
-                                    );
-                                }
-                                __field1 = _serde::__private::Some(
-                                    _serde::de::MapAccess::next_value::<String>(
                                         &mut __map,
                                     )?,
                                 );
@@ -244,20 +178,14 @@ const _: () = {
                             _serde::__private::de::missing_field("a")?
                         }
                     };
-                    let __field1 = match __field1 {
-                        _serde::__private::Some(__field1) => __field1,
-                        _serde::__private::None => {
-                            _serde::__private::de::missing_field("b")?
-                        }
-                    };
                     _serde::__private::Ok(Foo {
                         a: __field0,
-                        b: __field1,
+                        b: _serde::__private::Default::default(),
                     })
                 }
             }
             #[doc(hidden)]
-            const FIELDS: &'static [&'static str] = &["a", "b"];
+            const FIELDS: &'static [&'static str] = &["a"];
             _serde::Deserializer::deserialize_struct(
                 __deserializer,
                 "Foo",
