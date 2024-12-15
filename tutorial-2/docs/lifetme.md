@@ -47,7 +47,7 @@ As far as I know that the purpose of lifetime binding is because, Rust does not 
 - **Prevention of dangling references**
 
 **Similarity vs. Thread's Join Function**
-In Rust, lifetimes can be though of a **synchornization mechanism** for memory references, similar to how the `join()` funciton in threading ensures all threads complete their tasks before exiting. Just as `join()` prevents threads from being terminated prematurely while they are still doing work, **lifetimes** ensure that references to data remain valid as long as they are being used.
+In Rust, lifetimes can be though of a **synchornization mechanism** for memory references(but actually they are totally different things), similar to how the `join()` funciton in threading ensures all threads complete their tasks before exiting. Just as `join()` prevents threads from being terminated prematurely while they are still doing work, **lifetimes** ensure that references to data remain valid as long as they are being used.
 
 **Thread Join** vs. **Lifetimes in Rust**:
 
