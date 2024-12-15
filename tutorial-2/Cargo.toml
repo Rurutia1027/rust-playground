@@ -23,6 +23,18 @@ path = "src/broadcast/broadcast.rs"
 name = "multibroadcast"
 path = "src/broadcast/multi_broadcast.rs"
 
+[[bin]]
+name = "serdewhatnow"
+path = "src/serde_topic/main.rs"
+
+[[bin]]
+name = "lifetime"
+path = "src/lifetime_topic/main.rs"
+
+[[bin]]
+name = "generic"
+path = "src/generic_topic/main.rs"
+
 
 [dependencies]
 serde = {version = "1", features = ["derive"]}
