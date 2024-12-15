@@ -53,3 +53,78 @@ In Rust, lifetimes can be though of a **synchornization mechanism** for memory r
 
 - Thread Join ensures threads finish execution before the main thread continues.
 - Lifetimes in Rust: Ensure references **(borrowed data/references)** remain valid and in scope until they are no longer used.
+
+---
+
+## Understanding `&'static` and Memory Allocation
+
+### What's `&'static`?
+
+A &'static reference is a reference to data tht is guaranteed to live for the **entire lifetime of the program**.
+THis ensures that the referenced data is not deallocated until the program exits.
+
+### Key Features of `&'static`
+
+**Lifetime**
+**Memory Efficiency**
+**Immutability**
+**Common Usage**
+
+### Example of `&'static` with a Struct
+
+```rust
+#[derive(Debug)]
+struct MyStruct {
+    name: &'static str,
+    value: u32
+}
+
+static STATIC_STRUCT: MyStruct = MyStruct {
+    name: "Example",
+    value: 42
+};
+
+pub fn get_static_struct() -> &'static MyStruct {
+    &STATIC_STRUCT
+}
+
+fn main() {
+    let first = get_static_struct();
+    let second = get_static_struct();
+
+    println!("First: {:?}, Second: {:?}", first, second);
+    // static decorated struct instance should be the same memory address
+    // u32 is stack allocated variable, it will still be the constant address value
+    // but string is heap allocated, try to let it's address be constant, we need to use &'static this decorator
+    // and all heap-allocated variables that are decorated by &'static their memory address will not be changed during the complete lifetime of the program.
+    println!("same memory address: {}", std::ptr:eq(first, second));
+}
+```
+
+**Single Memory Allocation**
+
+- STATIC_STRUCT is allocated once in the program's **read-only memory**
+- Both first and second references point to the same memory address.
+
+**No Duplicate Allocations**
+
+- References to `&'static` data avoid creating duplicate memory allocations.
+- This applies to both simple and complex data(e.g., strings, structs).
+
+**Immutability Ensures Safety**
+
+- Since STATIC_STRUCT is declared as static, it is immutable.
+- THis ensures that multiple references can safetly share the same memory(do not care about data racing or dirty data read).
+
+**Static** vs. **Dynamic** Allocation
+
+- Static Allocation
+
+> Data is initialized and stored in memory for the lifetime of the program.
+> Used for constants, configurations, and global shared resources.
+> Efficient: Shared memory usage for `&'static` references.
+
+- Dynamic Allocation
+  > Data is allocated at runtime, e.g., via `Box`, `Rc` or `Arc`.
+  > Each allocation creates a new memory space.
+  > References point to different locations unless explicitly shared (e.g., with Arc).
