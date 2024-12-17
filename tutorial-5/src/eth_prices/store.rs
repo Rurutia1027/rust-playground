@@ -267,6 +267,10 @@ mod tests {
             .await;
         let query_eth_price =
             eth_prices_store.get_most_recent_price().await.unwrap();
+        println!(
+            "query_eth_price: {:?}, target_value: {:?}",
+            query_eth_price, test_price
+        );
         assert_eq!(query_eth_price, test_price);
     }
 
@@ -293,6 +297,10 @@ mod tests {
 
         let eth_price_ret =
             eth_price_store.get_most_recent_price().await.unwrap();
+        println!(
+            "eth_price_ret {:?}, target_value: {:?}",
+            eth_price_ret, test_price_2
+        );
         assert_eq!(eth_price_ret, test_price_2);
     }
 
