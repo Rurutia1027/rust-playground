@@ -13,7 +13,7 @@ By default, Rust looks for binarys under src/main.rs file. However, if we need *
 **Cargo.toml Declaration:**
 Rust allows us to declare binaries explicitly in the `Cargo.toml`. However, files placed under the `bin/` directory are automatically detected without needing manual declaration.
 
---
+---
 
 ## Sequential Entry Points
 
@@ -145,7 +145,7 @@ async fn main() {
 }
 ```
 
---
+---
 
 ## How to Run the Project
 
