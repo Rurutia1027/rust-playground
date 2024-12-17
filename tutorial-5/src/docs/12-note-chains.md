@@ -1,4 +1,4 @@
-# Under Execution Chain and Beacon Chain
+# Understand Execution Chain and Beacon Chain
 
 ## Execution Chain (Ethereum 1.0 / Legacy Chain)
 
