@@ -2,19 +2,16 @@
 
 Rust projects allow us to declare multiple binary entry points for a single crate. This enables modular design where different binaries can perform separate tasks or be executed in sequence.
 
-## Understand
+## Understand Main Entry Points
 
-- `main` function:
+**`main` function:**
+This is the default entry point for any Rust binary. The main function serves as the execution start point of your application. Any initialization of **configuration**, **database migraiton**, or **pre-required services** should happen here.
 
-* This is the default entry point for any Rust binary.
-* The main function serves as the execution start point of your application.
-* Any initialization of **configuration**, **database migraiton**, or **pre-required services** should happen here.
+**Multiple Binaries (`bin/folder`):**
+By default, Rust looks for binarys under src/main.rs file. However, if we need **multiple entry points**, we can define them under the `bin/` this directory. Each file under `bin/` acts as an **independent binary**, with its own `main` function.
 
-- Multiple Binaries (`bin/folder`):
-  By default, Rust looks for binarys under src/main.rs file. However, if we need **multiple entry points**, we can define them under the `bin/` this directory. Each file under `bin/` acts as an **independent binary**, with its own `main` function.
-
-- Cargo.toml Declaration:
-  Rust allows us to declare binaries explicitly in the `Cargo.toml`. However, files placed under the `bin/` directory are automatically detected without needing manual declaration.
+**Cargo.toml Declaration:**
+Rust allows us to declare binaries explicitly in the `Cargo.toml`. However, files placed under the `bin/` directory are automatically detected without needing manual declaration.
 
 --
 
@@ -25,11 +22,10 @@ In projects where we need to run **different binaries in sequence**, you can des
 Here is an example:
 
 - First, we use a **primary entry point**(e.g., src/main.rs) to handle setup(e.g., **database initialization**, **database migration**, **config loading**, etc).
-- ## After everything setup and get ready, continue **call other binaries** which each main entry point is located under folder `bin/` to perform specific task(sync data, scheduler, long-running monitoring).
+
+- After everything setup and get ready, continue **call other binaries** which each main entry point is located under folder `bin/` to perform specific task(sync data, scheduler, long-running monitoring).
 
 ## Code Example
-
-- Project Structure
 
 ```shell
 my_project/
