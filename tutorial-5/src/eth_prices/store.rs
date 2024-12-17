@@ -160,8 +160,13 @@ impl EthPriceStore for EthPriceStorePostgres {
         .average
     }
 
-    // query ether price value from `eth_prices` which with current timestamp closest to
-    // min(current timestamp - 24 hourse before)
+    /**
+     * This function retrieves the closest price record from the database where
+     * the timestamp is approximately 24 hours ago.
+     * It calculates the abs value between each database record's timestamp and
+     * the "current timestamp - 24 hours" to find the nearest match, ensuring the
+     * difference is within a given time limit(age_limit).
+     */
     async fn get_price_h24_ago(
         &self,
         age_limit: &Duration,
@@ -237,5 +242,121 @@ impl EthPriceStore for EthPriceStorePostgres {
         // todo!() block: &ExecutionNodeBlock,
     ) -> Result<f64, GetEthPriceError> {
         Ok(0.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{db::tests::TestDb, eth_prices};
+    use chrono::SubsecRound;
+    use test_context::test_context;
+
+    #[test_context(TestDb)]
+    #[tokio::test]
+    async fn store_price_test(test_db: &TestDb) {
+        // create db connection for eth price store postgres
+        let eth_prices_store = EthPriceStorePostgres::new(test_db.pool.clone());
+        let test_price = EthPrice {
+            timestamp: Utc::now().trunc_subsecs(0),
+            usd: 0.0,
+        };
+
+        eth_prices_store
+            .store_price(&test_price.timestamp, test_price.usd)
+            .await;
+        let query_eth_price =
+            eth_prices_store.get_most_recent_price().await.unwrap();
+        assert_eq!(query_eth_price, test_price);
+    }
+
+    #[test_context(TestDb)]
+    #[tokio::test]
+    async fn get_most_recent_price_test(test_db: &TestDb) {
+        let eth_price_store = EthPriceStorePostgres::new(test_db.pool.clone());
+        let test_price_1 = EthPrice {
+            timestamp: Utc::now().trunc_subsecs(0) - Duration::seconds(10),
+            usd: 0.9,
+        };
+
+        let test_price_2 = EthPrice {
+            timestamp: Utc::now().trunc_subsecs(0),
+            usd: 1.0,
+        };
+
+        eth_price_store
+            .store_price(&test_price_1.timestamp, test_price_1.usd)
+            .await;
+        eth_price_store
+            .store_price(&test_price_2.timestamp, test_price_2.usd)
+            .await;
+
+        let eth_price_ret =
+            eth_price_store.get_most_recent_price().await.unwrap();
+        assert_eq!(eth_price_ret, test_price_2);
+    }
+
+    #[test_context(TestDb)]
+    #[tokio::test]
+    async fn get_h24_average_test(test_db: &TestDb) {
+        let eth_price_store = EthPriceStorePostgres::new(test_db.pool.clone());
+
+        // test_price_0 is located in [query_ts - 24 hours, query_ts]
+        let test_price_0 = EthPrice {
+            timestamp: Utc::now() - Duration::hours(23),
+            usd: 10.0,
+        };
+
+        // test_price_1 is located in [query_ts - 24 hours, query_ts]
+        let test_price_1 = EthPrice {
+            timestamp: Utc::now() - Duration::hours(23),
+            usd: 100.0,
+        };
+
+        // test_price_2 is located in [query_ts - 24 hours, query_ts]
+        let test_price_2 = EthPrice {
+            timestamp: Utc::now(),
+            usd: 100.0,
+        };
+
+        eth_price_store
+            .store_price(&test_price_0.timestamp, test_price_0.usd)
+            .await;
+
+        eth_price_store
+            .store_price(&test_price_1.timestamp, test_price_1.usd)
+            .await;
+
+        eth_price_store
+            .store_price(&test_price_2.timestamp, test_price_2.usd)
+            .await;
+
+        let price_h24_average = eth_price_store.get_h24_average().await;
+        println!("average value content : {:?}", price_h24_average);
+        assert_eq!(
+            price_h24_average,
+            (test_price_1.usd + test_price_2.usd + test_price_0.usd) / 3.0
+        );
+    }
+
+    #[test_context(TestDb)]
+    #[tokio::test]
+    async fn get_price_h24_ago_test(test_db: &TestDb) {
+        let eth_price_store = EthPriceStorePostgres::new(test_db.pool.clone());
+        let test_price = EthPrice {
+            timestamp: Utc::now().trunc_subsecs(0) - Duration::hours(24),
+            usd: 0.0,
+        };
+
+        eth_price_store
+            .store_price(&test_price.timestamp, test_price.usd)
+            .await;
+
+        // get_price_h24_ago will return the item
+        // which it's timestamp 24 hours prior and minest(|item#timestamp - 24 hours| < given_duration_in_minutes)
+        let price = eth_price_store
+            .get_price_h24_ago(&Duration::minutes(10))
+            .await;
+        assert_eq!(price.unwrap(), test_price);
     }
 }
