@@ -98,11 +98,11 @@ To ensure all test cases executed correctly, we have to deploy a Database of Pos
 ###  Database Setup(Tutorial 5 unit test cases rely on)
 **1. Set Up PostgreSQL**
 Deploy PostgreSQL DB locally or via Docker, and create a PostgreSQL database named `defaultdb` with the following credentials: 
-**username**: admin 
-**password**: admin 
-
-* Dockerfile setup is ok
-```
+- **username**: admin 
+- **password**: admin 
+- Dockerfile commands:
+  
+```shell 
 docker run --name postgres-db-container \
   -e POSTGRES_USER=admin \
   -e POSTGRES_PASSWORD=admin \
@@ -113,14 +113,14 @@ docker run --name postgres-db-container \
   
 **2. Export Database URL as Environment Variable**
 Export the deployed ok database connection URL string as an environment variable so that the test cases can access it. 
-In [GitHub CI/CD] environment, unit test cases require environment variables that are already declared in each job. 
+In [GitHub CI/CD](.github/workflows/ci.yml) environment, unit test cases require environment variables that are already declared in each job. 
 
 ```shell
 export DATABASE_URL=postgresql://admin:admin@localhost:5432/defaultdb
 ```
 
 **Run Tests**
-All projects include test cases to verify functionality. All of the test cases should be passed in the local environment and [GitHub CI/CD]. 
+All projects include test cases to verify functionality. All of the test cases should be passed in the local environment and [GitHub CI/CD](https://github.com/Rurutia1027/rust-playground/actions). 
 Use the following command to execute tests in local environments: 
 
 ```bash
