@@ -129,3 +129,27 @@ pub async fn record_eth_price() -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use crate::db::tests::TestDb;
+    use chrono::SubsecRound;
+    use test_context::test_context;
+
+    #[test]
+    fn test_hello_world() {
+        assert!(true);
+    }
+
+    // run this locally, we need to export our db url to environment variables via executing command on terminal
+    // export DATABASE_URL=postgresql://admin:admin@localhost:5432/defaultdb
+    // but in CI environment, we do not need to care about this, because DB_URL already configured inside ci.yml
+    // in tutorial-5's ci/cd job
+    #[test_context(TestDb)]
+    #[tokio::test]
+    async fn update_eth_price_with_most_recent_test(test_db: &TestDb) {
+        assert!(true);
+    }
+}
