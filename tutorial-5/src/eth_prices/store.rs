@@ -1,7 +1,7 @@
 use crate::bybit::EthPrice;
 use crate::units::UsdNewtype;
 use async_trait::async_trait;
-use chrono::{DateTime, Duration, DurationRound, Utc};
+use chrono::{DateTime, Duration, Utc};
 use sqlx::PgPool;
 use thiserror::Error;
 
@@ -248,12 +248,14 @@ impl EthPriceStore for EthPriceStorePostgres {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{db::tests::TestDb, eth_prices};
+    use crate::db::tests::TestDb;
     use chrono::SubsecRound;
+    use serial_test::serial;
     use test_context::test_context;
 
     #[test_context(TestDb)]
     #[tokio::test]
+    #[serial]
     async fn store_price_test(test_db: &TestDb) {
         // create db connection for eth price store postgres
         let eth_prices_store = EthPriceStorePostgres::new(test_db.pool.clone());
@@ -276,7 +278,13 @@ mod tests {
 
     #[test_context(TestDb)]
     #[tokio::test]
+    #[serial]
     async fn get_most_recent_price_test(test_db: &TestDb) {
+        sqlx::query!("TRUNCATE TABLE eth_prices RESTART IDENTITY")
+            .execute(&test_db.pool.clone())
+            .await
+            .expect("Failed to clean database table");
+
         let eth_price_store = EthPriceStorePostgres::new(test_db.pool.clone());
         let test_price_1 = EthPrice {
             timestamp: Utc::now().trunc_subsecs(0) - Duration::seconds(10),
@@ -306,7 +314,13 @@ mod tests {
 
     #[test_context(TestDb)]
     #[tokio::test]
+    #[serial]
     async fn get_h24_average_test(test_db: &TestDb) {
+        sqlx::query!("TRUNCATE TABLE eth_prices RESTART IDENTITY")
+            .execute(&test_db.pool.clone())
+            .await
+            .expect("Failed to clean database table");
+
         let eth_price_store = EthPriceStorePostgres::new(test_db.pool.clone());
 
         // test_price_0 is located in [query_ts - 24 hours, query_ts]
@@ -349,6 +363,7 @@ mod tests {
 
     #[test_context(TestDb)]
     #[tokio::test]
+    #[serial]
     async fn get_price_h24_ago_test(test_db: &TestDb) {
         let eth_price_store = EthPriceStorePostgres::new(test_db.pool.clone());
         let test_price = EthPrice {
