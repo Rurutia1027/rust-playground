@@ -11,6 +11,8 @@ use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
+use std::clone;
+use tokio::time::sleep;
 use tracing::{debug, info};
 
 #[derive(Debug, FromRow)]
@@ -87,5 +89,43 @@ async fn update_eth_price_with_most_recent(
 
     // use pg-inner function to broadcast update status as aduit info
     caching::publish_cache_update(db_pool, &CacheKey::EthPrice).await;
+    Ok(())
+}
+
+// `record_eth_price` serves as the entry point for fetching, comparing, and storing price and timestamp values
+// from the Bybit API to the local cache and database every 5 seconds.
+//
+// This synchronization task is a long-running process that starts after initializaiton.
+// There is no need to worry about database table creation or migration issues,
+// as this task is executed only after the project's main entry process (`server::serve()`),
+// where all database initialization and migraiton operations are completed.
+// Subsequent sub-tasks, such as this one, are triggered in sequenc after main process is setup completely.
+pub async fn record_eth_price() -> Result<()> {
+    info!("recording eth prices from bybit to local db table");
+    let client = reqwest::Client::new();
+    // name the db pool with record-eth-price which executes db connections only for record eth price
+    let db_pool = db::get_db_pool("record-eth-price", 3).await;
+    let key_value_store = KeyValueStorePostgres::new(db_pool.clone());
+    // todo()! let eth_price_store
+
+    // this last_price should be fetch from the eth_price_store which is the cache only for storing eth-price
+    let mut last_price = &mut EthPrice {
+        timestamp: Utc::now(),
+        usd: 0.0,
+    };
+
+    // this is a long-running process for fetch & record eth price from bybit to local db
+
+    loop {
+        update_eth_price_with_most_recent(
+            &client,
+            &db_pool,
+            &key_value_store,
+            last_price,
+        )
+        .await?;
+        sleep(std::time::Duration::from_secs(10)).await;
+    }
+
     Ok(())
 }
