@@ -9,6 +9,7 @@ use crate::{
 };
 use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
+use serde::Deserialize;
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
 use std::clone;
@@ -20,7 +21,7 @@ struct EthPriceTimestamp {
     timestamp: DateTime<Utc>,
 }
 
-#[derive(Clone, Debug, FromRow, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, FromRow, PartialEq)]
 struct EthPrice {
     pub timestamp: DateTime<Utc>,
     #[sqlx(rename = "ethusd")]
@@ -133,8 +134,10 @@ pub async fn record_eth_price() -> Result<()> {
 #[cfg(test)]
 mod tests {
 
+    use self::EthPrice;
     use super::*;
     use crate::db::tests::TestDb;
+    use anyhow::Context;
     use chrono::SubsecRound;
     use test_context::test_context;
 
@@ -147,9 +150,59 @@ mod tests {
     // export DATABASE_URL=postgresql://admin:admin@localhost:5432/defaultdb
     // but in CI environment, we do not need to care about this, because DB_URL already configured inside ci.yml
     // in tutorial-5's ci/cd job
+    #[ignore = "failing in CI, caused by bybit API request limit"]
     #[test_context(TestDb)]
     #[tokio::test]
     async fn update_eth_price_with_most_recent_test(test_db: &TestDb) {
         assert!(true);
+        let client = reqwest::Client::new();
+        let key_value_store = KeyValueStorePostgres::new(test_db.pool.clone());
+        let test_price = EthPrice {
+            // mock timestamp fetched from the eth price db table old value
+            timestamp: Utc::now().trunc_subsecs(0) - Duration::minutes(10),
+            usd: 0.0,
+        };
+
+        let mut last_price = test_price.clone();
+
+        // here we invoke the update_eth_price_with_most_recent
+        // what we expected is the latest value will be fetched, filtered , converted and insert to the kv store table
+        // we have not implement the table operations especially for eth price table, so only kv store table will be updated
+        update_eth_price_with_most_recent(
+            &client,
+            &test_db.pool,
+            &key_value_store,
+            &mut last_price,
+        )
+        .await
+        .unwrap();
+
+        let value = caching::get_serialized_caching_value(
+            &key_value_store,
+            &CacheKey::EthPrice,
+        )
+        .await
+        .context("cannot find value via cache key")
+        .unwrap();
+
+        // println!("value content: {:?}", value);
+        // convert the Value into the string
+        let db_saved_eth_price: EthPrice =
+            serde_json::from_value::<EthPrice>(value)
+                .context("failed to convert value from value")
+                .unwrap_or(EthPrice {
+                    timestamp: Utc::now(),
+                    usd: 0.0,
+                });
+
+        assert_ne!(
+            EthPrice {
+                timestamp: Utc::now(),
+                usd: 0.0,
+            },
+            db_saved_eth_price
+        );
+
+        println!("db_saved_eth_price item {:?}", db_saved_eth_price);
     }
 }
