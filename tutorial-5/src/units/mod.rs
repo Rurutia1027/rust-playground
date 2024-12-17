@@ -5,6 +5,7 @@ mod wei;
 
 pub use eth::EthNewType;
 pub use gwei::GWeiNewType;
+pub use usd::UsdNewtype;
 pub use wei::WeiNewType;
 
 // 1 ETH = 10 ^9 Gwei

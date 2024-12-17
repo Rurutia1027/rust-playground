@@ -6,5 +6,4 @@ Cargo.lock
 **/src/Cargo.lock
 /store 
 **/bin/store/
-migrations
 .sqlx
