@@ -80,6 +80,56 @@ We referred to several amazing open-source repositories, listed below with brief
 
 ---
 
+## 🛠️ Setup
+
+To get started, clone the repository and navigate to the desired project folder:
+
+```bash
+git clone https://github.com/Rurutia1027/rust-playground.git
+cd rust-playground/
+```
+
+This repository is **not project-oriented**. Instead, it contains **classic Rust examples** and small, modular code snippets to demonstrate essential concepts and practical use cases. 
+Each tutorial highlights specific topics:
+In **Tutorial-5** we introduce **blockchain-oriented practices** and **database** oriented operations and test cases: 
+
+To ensure all test cases executed correctly, we have to deploy a Database of PostgreSQL locally by following steps, then we can make sure the local test cases can be executed successfully. 
+
+###  Database Setup(Tutorial 5 unit test cases rely on)
+**1. Set Up PostgreSQL**
+Deploy PostgreSQL DB locally or via Docker, and create a PostgreSQL database named `defaultdb` with the following credentials: 
+**username**: admin 
+**password**: admin 
+
+* Dockerfile setup is ok
+```
+docker run --name postgres-db-container \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_PASSWORD=admin \
+  -e POSTGRES_DB=defaultdb \
+  -p 5432:5432 \
+  -d postgres
+```
+  
+**2. Export Database URL as Environment Variable**
+Export the deployed ok database connection URL string as an environment variable so that the test cases can access it. 
+In [GitHub CI/CD] environment, unit test cases require environment variables that are already declared in each job. 
+
+```shell
+export DATABASE_URL=postgresql://admin:admin@localhost:5432/defaultdb
+```
+
+**Run Tests**
+All projects include test cases to verify functionality. All of the test cases should be passed in the local environment and [GitHub CI/CD]. 
+Use the following command to execute tests in local environments: 
+
+```bash
+cargo test -- --nocapture
+```
+The `--nocapture` flag ensures that `println!` messages in unit test cases are visible on the console during test execution.  
+
+---
+
 ## 🌟 Features
 
 - **CI/CD Pipeline**:  
@@ -94,27 +144,15 @@ We referred to several amazing open-source repositories, listed below with brief
 
 ---
 
-## 🛠️ Setup
-
-To get started, clone the repository and navigate into the desired project folder.
-
-```bash
-git clone https://github.com/Rurutia1027/rust-playground.git
-cd rust-playground/tutorial-1
-```
-
-**Run Tests**
-All projects include test cases to verify functionality. Use the following command to execute tests:
-
-```bash
-cargo test --nocapture
-```
-
----
-
 ## 📝 Contributing
 
-Contributions are welcome! Feel free to fork the repository, make your changes, and submit a pull request.
+Contributions, discussions, and issues are always welcome! This is not a formal project, but rather a playground for learning and experimenting with Rust.
+If you have **good ideas**, suggestions, or want to collaborate, feel free to: 
+- Fork the repository, make your changes, and submit a **pull request**.
+- Open an **issue** to discuss bugs, improvements, or new ideas.
+- Reach out to me directly via email: [rurutia1027@gmail.com](rurutia1027@gmail.com).
+
+Let's learn and build together! 🚀
 
 ---
 
