@@ -1,3 +1,4 @@
+pub mod bybit;
 pub mod caching;
 pub mod db;
 pub mod env;
