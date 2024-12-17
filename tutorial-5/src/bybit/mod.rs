@@ -12,17 +12,16 @@ use chrono::{DateTime, Duration, Utc};
 use serde::Deserialize;
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
-use std::clone;
 use tokio::time::sleep;
 use tracing::{debug, info};
 
 #[derive(Debug, FromRow)]
-struct EthPriceTimestamp {
+pub struct EthPriceTimestamp {
     timestamp: DateTime<Utc>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, FromRow, PartialEq)]
-struct EthPrice {
+pub struct EthPrice {
     pub timestamp: DateTime<Utc>,
     #[sqlx(rename = "ethusd")]
     pub usd: f64,

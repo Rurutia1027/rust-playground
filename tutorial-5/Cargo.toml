@@ -33,3 +33,4 @@ thiserror = "1.0.49"
 hyper = { version = "0.14", features = ["full"] }
 backoff = { version = "0.4.0", features = ["tokio"] }
 format-url = "0.6.2"
+serial_test = "1.0"
