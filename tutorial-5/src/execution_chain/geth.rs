@@ -1,8 +1,8 @@
 // add series of test codes for fetching
 // ethereum block, transaction, account, smart contracts and receipts datasets via local Geth exposed WebSocket endpoint
-
 #[cfg(test)]
 mod tests {
+    use async_trait::async_trait;
     use async_tungstenite::{
         tokio::{connect_async, ConnectStream},
         tungstenite::Message,
@@ -10,7 +10,64 @@ mod tests {
     };
     use futures::{SinkExt, StreamExt};
     use serde_json::{json, Value};
-    use std::time::{Duration, Instant};
+    use test_context::AsyncTestContext;
+    pub struct WebSocketTestHandler {
+        pub ws: Option<
+            async_tungstenite::WebSocketStream<
+                async_tungstenite::tokio::ConnectStream,
+            >,
+        >,
+        url: String,
+    }
+
+    impl WebSocketTestHandler {
+        pub async fn new(url: &str) -> Self {
+            let (ws, _) = connect_async(url.clone())
+                .await
+                .expect("Failed to connect to WebSocket node");
+
+            WebSocketTestHandler {
+                ws: Some(ws),
+                url: url.to_string(),
+            }
+        }
+
+        pub async fn shutdown(self) {
+            // do nothing
+        }
+
+        pub async fn send_request(&mut self, request: Value) -> Value {
+            let ws = self.ws.as_mut().expect("WebSocket is not initialized");
+            ws.send(Message::Text(request.to_string()))
+                .await
+                .expect("Failed to send message");
+
+            let response = ws
+                .next()
+                .await
+                .expect("Failed to receive response")
+                .expect("Failed to parse response");
+
+            if let Message::Text(text) = response {
+                serde_json::from_str(&text)
+                    .expect("Failed to parse JSON response")
+            } else {
+                panic!("Expected text message from WebSocket")
+            }
+        }
+    }
+
+    #[async_trait]
+    impl AsyncTestContext for WebSocketTestHandler {
+        async fn setup() -> Self {
+            let url = "ws://127.0.0.1:8546"; // Example WebSocket URL
+            WebSocketTestHandler::new(url).await
+        }
+
+        async fn teardown(self) {
+            self.shutdown().await;
+        }
+    }
 
     fn generate_json_rpc_request_body(
         method: &str,
@@ -98,19 +155,15 @@ mod tests {
 
     async fn fetch_logs(
         ws: &mut WebSocketStream<ConnectStream>,
-        address: &str,
-        from_block: u64,
-        to_block: u64,
+        topics: Vec<&str>,
     ) -> Value {
         let request = json!({
             "jsonrpc": "2.0",
             "method": "eth_getLogs",
             "params": [{
-                "address": address,
-                "fromBlock": format!("0x{:x}", from_block),
-                "toBlock": format!("0x{:x}", to_block),
+                "topics": topics,
             }],
-            "id": 4
+            "id": 74
         });
         send_request(ws, request).await
     }
@@ -120,4 +173,26 @@ mod tests {
         assert!(true);
         println!("hello world");
     }
+
+    // https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getlogs
+    #[tokio::test]
+    async fn fetch_logs_test() {
+        let url = "ws://127.0.0.1:8546".to_string();
+        let mut ws = connect_to_ethereum_node(&url).await;
+        let topics = vec![{
+            "0x000000000000000000000000a94f5374fce5edbc8e2a8697c15331677e6ebf0b"
+        }];
+        let response = fetch_logs(&mut ws, topics).await;
+        // println!("response of fetch log test is : {:?}", response);
+        let ret = response.get("result");
+        assert!(ret.unwrap().is_array());
+    }
+
+    // https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbynumber
+    #[tokio::test]
+    async fn eth_getblockbynumber_test() {
+        let url = "ws://127.0.0.1:8546".to_string();
+    }
+
+    // todo()! share the ws via the test_context so that this WebSocket can be thread-safely shared among diffrent async test cases
 }
