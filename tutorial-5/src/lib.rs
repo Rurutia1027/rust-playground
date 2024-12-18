@@ -3,6 +3,7 @@ pub mod caching;
 pub mod db;
 pub mod env;
 pub mod eth_prices;
+pub mod execution_chain;
 pub mod health;
 pub mod key_value_store;
 pub mod mockservices;
