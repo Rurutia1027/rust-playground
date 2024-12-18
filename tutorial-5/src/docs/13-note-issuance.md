@@ -140,3 +140,65 @@ The balance between **issuance** and **burn** is critical for Ethereum's long-te
 This dynamic relationship between issuance and burn ensures that Ethereum's economic model remains robust and sustainable, promoting scarcity and maintaining the value of ETH over time.
 
 ---
+
+## Formulas
+
+- **Burn Formula**
+
+```
+Burned ETH = Base Fee * Gas Used
+```
+
+- **Net Supply Change**
+
+```
+Net Supply Change = Issuance - Burn
+```
+
+- **Validator Rewards**
+
+```
+Validator Rewards = Issuance + Priority Fees(Tips)
+```
+
+---
+
+## What's the Specific Formula for Issuance?
+
+Actually **issuance** in the Ethereum **Proof-of-Stake(Pos)** system can be though of as **new ETH minted by the network** to reward validators for securing the blockchain. It is a separate mechanism from **gas fees** and **burning**, and its value depends on the staking process and validator participation.
+
+**Issuance = New ETH Rewards to Validators**
+
+More spcificially:
+
+- **Issuance = ETH rewarded for block proposals and attestations**
+  Validators are rewarded for proposing blocks, attesting to blocks, and participating in consensus.
+
+- The total issuance depends on the **total amount of ETH staked** in the Beacon Chain. As more ETH is staked, the overall annual percentage rate(APR) decreases because the rewards are distributed among more validators.
+
+### Issuance Formula
+
+Ethereum issuance is based on a **reward curve** that depends on the total staked ETH. The reward rate is defined by the following formular:
+
+- **Annual Validator Issuance**
+
+```
+Annual Issuance (in ETH) = Base Reward Per Validator × Total Validators × Epochs Per Year
+```
+
+- **Base Reward Per Validator** is determined by
+
+```
+Base Reward = Effective Balance × Base Reward Factor ÷ SQRT(Total ETH Staked)
+```
+
+**Effective Balance**: Typically capped at 32 ETH per validator.
+**Base Reward Factor**: A constant defined in Ethereum's PoS specification.
+**Total ETH Staked**: Total amount of ETH staked across all validators.
+
+```
+// Net Supply Change: how many ETH in total on Beacon Chain
+// Issuance: Ethereum's validator validate blocks(provide secure service) will trigger minted new ETHs
+// Burned ETH: How many minted ETHs are destroyed with the aim of reducing total ETHs on Beacon Chain caused deflation(decrease of the value of ETHs which are allcoated to validators)
+Net Supply Change = Issuance - Burned ETH
+```
