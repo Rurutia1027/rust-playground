@@ -48,3 +48,23 @@ pub struct ExecutionNodeBlock {
     // Types for blocks coming from the node and from our DB should be split
     pub transactions: Vec<String>,
 }
+
+#[cfg(test)]
+pub mod tests {
+    // here we add series of functions in ExecutionNodeBlock
+    // to mock series of actions defined in the ExecutionNodeBlock
+    // so that other codes in the scope of mod test want to execute their logics with ExecutionNodeBlock
+    // we can directly invoked the Block's mock functions
+
+    use super::*;
+    use crate::units::WeiNewType;
+
+    pub struct ExecutionNodeBlockBuilder {
+        hash: String,
+        number: BlockNumber,
+        parent_hash: String,
+        timestamp: DateTime<Utc>,
+        gas_used: i32,
+        base_fee_per_gas: u64,
+    }
+}

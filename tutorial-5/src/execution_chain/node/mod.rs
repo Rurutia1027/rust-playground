@@ -1,5 +1,6 @@
 mod blocks;
 mod decoders;
+mod heads;
 mod transaction_receipts;
 
 use std::{
@@ -24,3 +25,5 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use thiserror::Error;
 use tokio::{net::TcpStream, sync::mpsc};
+
+pub struct ExecutionNode {}
