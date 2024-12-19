@@ -1,5 +1,6 @@
 mod blocks;
 mod decoders;
+mod transaction_receipts;
 
 use std::{
     collections::{HashMap, HashSet},
