@@ -72,21 +72,40 @@ jobs:
         env:
           RUSTFLAGS: "-Awarnings"       # Suppress warnings
           DATABASE_URL: "postgresql://admin:admin@localhost:5432/defaultdb"  # Set database URL for tests
-        run: |       
-          echo "install sqlx... "
+          GETH_URL: "ws://localhost:8546" # Set local setup Geth Endpoint 
+        run: |
+          echo "Install dependencies for Geth on local"
+          sudo apt update 
+          sudo apt install -y software-properties-common
+          sudo add-apt-repository -y ppa:ethereum/ethereum
+          sudo apt update
+          sudo apt install -y geth
+
+          echo "Start Geth in the background with necessary flags"
+          nohup geth --http --http.api "eth,web3,net" --ws --ws.api "eth,web3,net" --syncmode snap --ws.addr 0.0.0.0 --ws.port 8546 > geth.log 2>&1 &
+          sleep 30  # Wait for Geth to fully start
+
+          echo "Run Tests to Interact with Geth"
+          curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545
+
+          echo "Install sqlx... "
           cargo install sqlx-cli --no-default-features --features postgres 
 
-          echo "migrate via sqlx ..."          
+          echo "Migrate via sqlx ..."          
           sqlx migrate run --database-url postgres://admin:admin@localhost:5432/defaultdb
 
           echo "cargo sqlx prepare "
           cargo sqlx prepare 
           
-          echo "begin cargo build in tutorial-5"
+          echo "Begin cargo build in tutorial-5"
           cargo build --verbose
           
-          echo "begin cargo test in tutorial-5"
+          echo "Begin cargo test in tutorial-5"
           cargo test --verbose -- --nocapture
+
+          echo "Shutdown Geth Node"
+          pkill geth 
+          
       - name: Build and Test tutorial-6
         working-directory: ./tutorial-6
         run: |
