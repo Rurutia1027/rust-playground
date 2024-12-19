@@ -26,11 +26,11 @@ brew install ethereum
 ### Setup Geth with WebSocket Enabled
 
 ```shell
-geth --http --http.api "eth,web3,net" \
-     --ws --ws.api "eth,web3,net" \
+geth --http --http.api "eth" \
+     --ws --ws.api "eth" \
      --ws.addr 0.0.0.0 \
      --ws.port 8546 \
-     --syncmode "snap"
+     --syncmode full
 ```
 
 Explanation of Flags:

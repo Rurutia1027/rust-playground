@@ -8,13 +8,22 @@ mod tests {
         tungstenite::Message,
         WebSocketStream,
     };
+    use axum::http::response;
     use futures::{SinkExt, StreamExt};
     use serde_json::{json, Value};
-    use test_context::AsyncTestContext;
+    use std::sync::Arc;
+    use test_context::{test_context, AsyncTestContext};
+    use tokio::sync::Mutex;
+
+    #[derive(Debug, Clone)]
     pub struct WebSocketTestHandler {
         pub ws: Option<
-            async_tungstenite::WebSocketStream<
-                async_tungstenite::tokio::ConnectStream,
+            Arc<
+                Mutex<
+                    async_tungstenite::WebSocketStream<
+                        async_tungstenite::tokio::ConnectStream,
+                    >,
+                >,
             >,
         >,
         url: String,
@@ -27,32 +36,39 @@ mod tests {
                 .expect("Failed to connect to WebSocket node");
 
             WebSocketTestHandler {
-                ws: Some(ws),
+                ws: Some(Arc::new(Mutex::new(ws))),
                 url: url.to_string(),
             }
         }
 
-        pub async fn shutdown(self) {
-            // do nothing
+        pub async fn shutdown(mut self) {
+            if let Some(ws) = self.ws.take() {
+                let mut ws = ws.lock().await;
+                ws.close(None).await.expect("Failed to close WebSocket");
+            }
         }
 
         pub async fn send_request(&mut self, request: Value) -> Value {
-            let ws = self.ws.as_mut().expect("WebSocket is not initialized");
-            ws.send(Message::Text(request.to_string()))
-                .await
-                .expect("Failed to send message");
+            if let Some(ws) = self.ws.take() {
+                let mut ws = ws.lock().await;
+                ws.send(Message::Text(request.to_string()))
+                    .await
+                    .expect("Failed to send message");
 
-            let response = ws
-                .next()
-                .await
-                .expect("Failed to receive response")
-                .expect("Failed to parse response");
+                let response = ws
+                    .next()
+                    .await
+                    .expect("Failed to receive response")
+                    .expect("Failed to parse response");
 
-            if let Message::Text(text) = response {
-                serde_json::from_str(&text)
-                    .expect("Failed to parse JSON response")
+                if let Message::Text(text) = response {
+                    serde_json::from_str(&text)
+                        .expect("Failed to parse JSON response")
+                } else {
+                    panic!("Expected text message from WebSocket")
+                }
             } else {
-                panic!("Expected text message from WebSocket")
+                panic!("Expected current function get Websocket Successfully")
             }
         }
     }
@@ -60,7 +76,8 @@ mod tests {
     #[async_trait]
     impl AsyncTestContext for WebSocketTestHandler {
         async fn setup() -> Self {
-            let url = "ws://127.0.0.1:8546"; // Example WebSocket URL
+            // this is our local setup Geth Websocket Endpoint
+            let url = "ws://127.0.0.1:8546";
             WebSocketTestHandler::new(url).await
         }
 
@@ -168,12 +185,6 @@ mod tests {
         send_request(ws, request).await
     }
 
-    #[tokio::test]
-    async fn hello_world_test() {
-        assert!(true);
-        println!("hello world");
-    }
-
     // https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getlogs
     #[tokio::test]
     async fn fetch_logs_test() {
@@ -188,11 +199,35 @@ mod tests {
         assert!(ret.unwrap().is_array());
     }
 
+    // https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_blocknumber
+    #[tokio::test]
+    async fn eth_blocknumber_test() {
+        let url = "ws://127.0.0.1:8546".to_string();
+        let mut ws = connect_to_ethereum_node(&url).await;
+        let request = json!({
+            "jsonrpc": "2.0",
+            "method": "eth_blocknumber",
+            "params": [],
+            "id": 1
+        });
+
+        let response = send_request(&mut ws, request).await;
+        println!("get response {:?}", response);
+    }
+
     // https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_getblockbynumber
     #[tokio::test]
     async fn eth_getblockbynumber_test() {
         let url = "ws://127.0.0.1:8546".to_string();
+        let mut ws = connect_to_ethereum_node(&url).await;
+        let block_number: u64 = 436;
+        let response = fetch_block_by_number(&mut ws, block_number).await;
+        if let Some(obj_content) = response.get("error") {
+            if let Some(message) = obj_content.get("message") {
+                let msg_str = message.as_str().unwrap_or("Not a String");
+                println!("msg str content : {:?}", msg_str);
+                assert!(msg_str.len() > 0);
+            }
+        }
     }
-
-    // todo()! share the ws via the test_context so that this WebSocket can be thread-safely shared among diffrent async test cases
 }
