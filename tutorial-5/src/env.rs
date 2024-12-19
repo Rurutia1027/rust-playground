@@ -36,7 +36,10 @@ pub fn get_env_bool(key: &str) -> Option<bool> {
 
 pub fn get_env_config() -> EnvConfig {
     EnvConfig {
+        // export DATABASE_URL=postgresql://admin:admin@localhost:5432/defaultdb
         db_url: get_env_var("DATABASE_URL").expect("DATABASE_URL is required"),
+        // export GETH_URL=ws://localhost:8546
+        geth_url: get_env_var("GETH_URL"),
         log_json: get_env_bool("LOG_JSON").unwrap_or(false),
         log_perf: get_env_bool("LOG_PERF").unwrap_or(false),
     }
@@ -44,6 +47,7 @@ pub fn get_env_config() -> EnvConfig {
 
 pub struct EnvConfig {
     pub db_url: String,
+    pub geth_url: Option<String>,
     pub log_json: bool,
     pub log_perf: bool,
 }
