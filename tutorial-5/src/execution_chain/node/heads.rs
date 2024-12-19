@@ -1,24 +1,6 @@
 use async_tungstenite::tungstenite::Message;
 use chrono::{DateTime, Utc};
 
-/// This class encapsulates the communication between the application and an Ethereum node(e.g., Geth)
-/// using the JSON-RPC 2.0 protocol over WebSocket. it handles:
-/// - **JSON-RPC Message Formatting**:
-///   Encapsulates the structure and format of JSON-RPC request for various Ethereum RPC methods
-///   (e.g., `eth_subscribe`, `eth_unsubscribe`).
-///
-/// - **WebSocket Communication**:
-/// Manages the WebSocket connection for sending requests and receving responses or push notifications.
-///
-/// - **Subscription Mechanism**:
-/// Handles the subscription to Ethereum events like `newHeads`, allowing the application to react to
-/// new blocks as they are mined.
-///
-/// - **Deserialization of Responses**:
-/// Parses and converts incoming JSON-RPC messages into Rust data structures(e.g., `Head` for new block headers).
-///
-/// The primary goal of this class is to abstract away the complexities of JSON-RPC formatting
-/// and WebSocket communication, providing a high-level interface for interacting with an Ethereum node.
 use serde::Deserialize;
 use serde_json::json;
 
