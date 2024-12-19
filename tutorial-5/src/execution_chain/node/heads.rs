@@ -1,8 +1,10 @@
-use async_tungstenite::tungstenite::Message;
+use async_tungstenite::{tokio as tungstenite, tungstenite::Message};
 use chrono::{DateTime, Utc};
-
+use futures::{channel::mpsc, SinkExt, Stream, StreamExt, TryStreamExt};
 use serde::Deserialize;
 use serde_json::json;
+
+use crate::env::ENV_CONFIG;
 
 use super::{
     blocks::{BlockNumber, ExecutionNodeBlock},
@@ -106,4 +108,71 @@ enum SubscriptionResponse {
         id: i32,
         jsonrpc: String,
     },
+}
+
+// method to subscribe newHead events from Ethereum
+// and extract required fields from event body into local struct variable Head
+pub fn stream_new_heads() -> impl Stream<Item = Head> {
+    let (mut new_heads_tx, new_heads_rx) = mpsc::unbounded();
+
+    tokio::spawn(async move {
+        let url = ENV_CONFIG
+            .geth_url
+            .as_ref()
+            .expect("GETH_URL is required in env to stream new heads")
+            .to_string();
+
+        let mut ws = tungstenite::connect_async(&url).await.unwrap().0;
+        ws.send(HeadMessage::Subscribe.into()).await.unwrap();
+
+        // here we expect a subscription confirmation message first.
+        // then we loop on None that's the reason we use clippy::never_loop
+        #[allow(clippy::never_loop)]
+        while let Some(message) = ws.try_next().await.unwrap() {
+            let message_text = message.to_text().unwrap();
+            let message: SubscriptionResponse =
+                serde_json::from_str(message_text).unwrap();
+
+            match message {
+                // receive subscribe success response handle logic:
+                SubscriptionResponse::SuccessMessage { .. } => {
+                    // we don't care about the success message inner content,
+                    // write log , then break go comming loop to handle coming subscribed event messages
+                    tracing::debug!("got subscription confirmation message");
+                    break;
+                }
+                // receive subscribe fail response handle logic:
+                SubscriptionResponse::ErrorMessage { error, .. } => {
+                    // skip other fields only keep error add the error info to panic
+                    panic!(
+                        "subscription error, code {}, message: {}",
+                        error.code, error.message
+                    )
+                }
+            }
+        } // loop for receiving subscription conformation or failure response
+
+        // this loop is looping for receving subscribed & handle newHead events
+        while let Some(message) = ws.try_next().await.unwrap() {
+            // waiting for the next message to arrive can take many seconds, during this
+            // waiting we may receive a ping message, just skip is ok
+            if message.is_ping() {
+                continue;
+            }
+
+            // here we manipulate the coming newHead events
+            let message_text = message.to_text().unwrap();
+            let new_head_message: NewHeadMessage =
+                serde_json::from_str(message_text).unwrap();
+            // convert new head message into Head
+            let new_head = new_head_message.into();
+
+            // here append the coming & converted newHead event into Head
+            // and append it to real-time streaming receiver
+            new_heads_tx.send(new_head).await.unwrap();
+        }
+    });
+
+    // take the stream handler as reutrn value
+    new_heads_rx
 }
