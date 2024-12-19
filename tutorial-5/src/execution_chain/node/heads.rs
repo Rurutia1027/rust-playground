@@ -4,13 +4,12 @@ use futures::{channel::mpsc, SinkExt, Stream, StreamExt, TryStreamExt};
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::env::ENV_CONFIG;
-
 use super::{
     blocks::{BlockNumber, ExecutionNodeBlock},
     decoders::*,
     ExecutionNode,
 };
+use crate::{env::ENV_CONFIG, execution_chain::BlockRange};
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -176,3 +175,11 @@ pub fn stream_new_heads() -> impl Stream<Item = Head> {
     // take the stream handler as reutrn value
     new_heads_rx
 }
+
+// add extra map operation to extract each Head#number as BlockNumber
+fn stream_new_head_block_numbers() -> impl Stream<Item = BlockNumber> {
+    stream_new_heads().map(|head| head.number)
+}
+
+#[cfg(test)]
+mod tests {}
