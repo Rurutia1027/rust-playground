@@ -82,7 +82,12 @@ That make sense, and that's why we use WebSocket instead of RESTful API because 
 - Use case: Often used to monitor transactions before they are included in a block.
 
 ```json
-
+{
+  "jsonrpc": "2.0",
+  "method": "eth_subscribe",
+  "params": ["newPendingTransactions"],
+  "id": 4
+}
 ```
 
 ### `syncing`
