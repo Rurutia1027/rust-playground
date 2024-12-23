@@ -16,7 +16,9 @@ use async_tungstenite::{
     WebSocketStream,
 };
 
-use futures::{channel::oneshot, future::err, stream::SplitStream};
+use futures::{
+    channel::oneshot, future::err, stream::SplitStream, TryFutureExt,
+};
 use futures::{
     stream::{FuturesOrdered, StreamExt},
     SinkExt,
@@ -187,20 +189,15 @@ impl ExecutionNode {
 
         // convert json into string as message
         let message = serde_json::to_string(&json).unwrap();
+        println!("msessage request {}", message);
 
         // create sender/tx, receiver/rx pair as a channel instance
         let (tx, rx) = oneshot::channel();
 
         // insert the channle's sender side to hash map as value, and take the uid as the key thread safely
         self.message_rx_map.lock().unwrap().insert(id, tx);
-        // then use self variable message_tx: mspc::Sender<Message> send request to remote connected ethereum endpoint
-        // the response message will be intercepted by WebSocket in the scope of handle_messages this function
-        // and handle_messages will find corresponding current request's uid and find the sender in hashmap(message_rx_map)
-        // then pass the result(message response body or RPCError message) to sender
         self.message_tx.send(Message::Text(message)).await.unwrap();
 
-        // and here once the sender got the response, and invoke send(response) the response will be
-        // handed to rx side, rx#await is waiting for sender/tx's Err(err_msg) or Ok(result) asynchronously
         rx.await.unwrap()
     }
 
@@ -248,30 +245,123 @@ impl ExecutionNode {
         }
     }
 
-    // pub async fn get_latest_block(&self) -> ExecutionNodeBlock {
-    //     ExecutionNodeBlock{}
-    // }
+    pub async fn get_latest_block(&self) -> ExecutionNodeBlock {
+        let value = self
+            .call("eth_getBlockByNumber", &json!(("latest", false)))
+            .await
+            .unwrap();
+        // println!("block content {:?}", value);
+        serde_json::from_value::<ExecutionNodeBlock>(value).unwrap()
+    }
 
-    // pub async get_block_by_hash(&self, hash: &str) -> Option<ExecutionNodeBlock> {
-    //     Ok(ExecutionNodeBlock{})
-    // }
+    pub async fn get_block_by_hash(
+        &self,
+        hash: &str,
+    ) -> Option<ExecutionNodeBlock> {
+        self.call("eth_getBlockByHash", &json!((hash, false)))
+            .await
+            .map_or_else(
+                |err| {
+                    tracing::error!(
+                        "eth_getBlockByHash bad response {:?}",
+                        err
+                    );
+                    None
+                },
+                |value| {
+                    serde_json::from_value::<Option<ExecutionNodeBlock>>(value)
+                        .unwrap()
+                },
+            )
+    }
 
-    // pub async get_block_by_number(&self, number: &BlockNumber) -> Option<ExecutionNodeBlock> {
-    //     Ok()
-    // }
+    pub async fn get_block_by_number(
+        &self,
+        number: &BlockNumber,
+    ) -> Option<ExecutionNodeBlock> {
+        let hex_number = format!("0x{number:x}");
+        println!("hex_number {}", hex_number);
+        self.call("eth_getBlockByNumber", &json!((hex_number, false)))
+            .await
+            .map_or_else(
+                |err| {
+                    tracing::error!(
+                        "eth_getBlockByNumber bad response {:?}",
+                        err
+                    );
+                    None
+                },
+                |value| {
+                    // println!("block content {:?}", value);
+                    serde_json::from_value::<Option<ExecutionNodeBlock>>(value)
+                        .unwrap()
+                },
+            )
+    }
 
-    // pub async fn get_transaction_receipt(
-    // ) -> Result<TransactionReceipt, TransactionReceiptUnavailable> {
-    // }
+    pub async fn get_transaction_receipt(
+        &self,
+        tx_hash: &str,
+    ) -> Result<TransactionReceipt, TransactionReceiptUnavailable> {
+        self.call("eth_getTransactionReceipt", &json!((tx_hash)))
+            .await
+            .map(|value| {
+                let receipt = serde_json::from_value::<
+                    Option<TransactionReceipt>,
+                >(value)
+                .expect("expect a transaction receipt response to be JSON");
+                match receipt {
+                    Some(receipt) => Ok(receipt),
+                    None => {
+                        Err(TransactionReceiptUnavailable(tx_hash.to_string()))
+                    }
+                }
+            })
+            .unwrap()
+    }
 
-    // pub async fn get_transaction_receipts_for_block(
-    //     &self,
-    //     block: &ExecutionNodeBlock,
-    // ) -> Result<Vec<TransactionReceipt>, TransactionReceiptUnavailable> {
-    // }
+    pub async fn get_transaction_receipts_for_block(
+        &self,
+        block: &ExecutionNodeBlock,
+    ) -> Result<Vec<TransactionReceipt>, TransactionReceiptUnavailable> {
+        let mut receipt_futures = FuturesOrdered::new();
+
+        for tx_hash in block.transactions.iter() {
+            receipt_futures.push_back(self.get_transaction_receipt(&tx_hash));
+        }
+
+        let mut receipts = Vec::new();
+        while let Some(receipt) = receipt_futures.next().await {
+            match receipt {
+                Ok(receipt) => {
+                    receipts.push(receipt);
+                }
+                Err(err) => {
+                    return Err(err);
+                }
+            }
+        }
+
+        Ok(receipts)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[tokio::test]
+    async fn get_latest_block_test() {
+        let node = ExecutionNode::connect().await;
+        let _block = node.get_latest_block().await;
+    }
+
+    #[tokio::test]
+    async fn get_block_by_number_test() {
+        let node = ExecutionNode::connect().await;
+        let block = node
+            .get_block_by_number(&0)
+            .await
+            .expect("Expect get block instance");
+        assert_eq!(block.number, 0x0);
+    }
 }

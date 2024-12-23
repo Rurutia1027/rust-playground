@@ -1,5 +1,5 @@
 use chrono::{DateTime, TimeZone, Utc};
-use serde::{ser::Error, Deserialize, Deserializer};
+use serde::{de, ser::Error, Deserialize, Deserializer};
 
 // function takes a deserializer as an argument, and return a Result<Option<i32>, D:Error>
 // it's lifetime 'de to make sure that the received deserializer D's lifetime will be consist to the end of this function invocation
@@ -55,6 +55,26 @@ where
     u32::from_str_radix(&s[2..], 16).map_err(|e| {
         serde::de::Error::custom(format!("Failed to parse hex string: {}", e))
     })
+}
+
+pub fn from_u64_opt_hex_str<'de, D>(
+    deserializer: D,
+) -> Result<Option<u64>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let opt: Option<String> = Deserialize::deserialize(deserializer)?;
+    if let Some(hex_str) = opt {
+        u64::from_str_radix(hex_str.trim_start_matches("0x"), 16)
+            .map(Some)
+            .map_err(|e| {
+                de::Error::custom({
+                    format!("Failed to parse hex string: {}", e)
+                })
+            })
+    } else {
+        Ok(None)
+    }
 }
 
 // function converted serialized string(hex) into unsigned integer 64(bits)
