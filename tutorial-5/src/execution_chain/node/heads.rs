@@ -181,5 +181,18 @@ fn stream_new_head_block_numbers() -> impl Stream<Item = BlockNumber> {
     stream_new_heads().map(|head| head.number)
 }
 
-#[cfg(test)]
-mod tests {}
+fn stream_historic_block_numbers(
+    block_range: BlockRange,
+) -> impl Stream<Item = BlockNumber> {
+    let (mut tx, rx) = futures::channel::mpsc::channel(10);
+    todo!();
+    rx
+}
+
+pub async fn stream_heads_from(
+    gte_slot: BlockNumber,
+) -> impl Stream<Item = BlockNumber> {
+    let (mut tx, rx) = futures::channel::mpsc::channel(10);
+    todo!();
+    rx
+}
