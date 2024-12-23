@@ -363,5 +363,82 @@ mod tests {
             .await
             .expect("Expect get block instance");
         assert_eq!(block.number, 0x0);
+        // here we got hash value: 0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3
+        println!("block content {:?}", block.hash);
+    }
+
+    #[tokio::test]
+    async fn get_block_by_hash_test() {
+        let node = ExecutionNode::connect().await;
+        let hash = "0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3";
+        let block = node
+            .get_block_by_hash(hash)
+            .await
+            .expect("Expect extract block from query response body");
+        assert_eq!(block.hash, hash);
+    }
+
+    #[tokio::test]
+    async fn get_unavailable_block_by_hash_test() {
+        let hash_value = "0x-hashvalue-does-not-exist";
+        let node = ExecutionNode::connect().await;
+        let block = node.get_block_by_hash(hash_value).await;
+        assert_eq!(block, None);
+    }
+
+    #[tokio::test]
+    async fn get_transaction_receipt_test() {
+        // Geth is a node in peer-to-peer ethereum system, it is setup and connect to the other peers
+        // ExecutionNode::connect this enables current program connect to local Geth process via WebSocket
+        let node = ExecutionNode::connect().await;
+        let block = node
+            .get_block_by_number(&0)
+            .await
+            .expect("Expect get block instance");
+
+        let tx_hash: Option<String> = if !block.transactions.is_empty() {
+            Some(block.transactions[0].clone())
+        } else {
+            None
+        };
+
+        if let Some(tx_hash) = tx_hash {
+            let receipt = node.get_transaction_receipt(&tx_hash).await.unwrap();
+            assert_eq!(tx_hash, receipt.transaction_hash);
+        } else {
+            println!("Latest block's tx_hash field is empty")
+        }
+    }
+
+    #[tokio::test]
+    async fn get_transaction_receipts_for_block_test() {
+        // take block as query condition to fetch all transaction items that are located in the queried block
+
+        let node = ExecutionNode::connect().await;
+        // to make sure test case stable running,
+        // we always take the latest block as the query block
+        let block = node.get_latest_block().await;
+
+        // query transactions via the current block and it may empty since geth may always fetch the 0x0 block as the latest block in CI env
+        let receipts = node
+            .get_transaction_receipts_for_block(&block)
+            .await
+            .expect("expect receipts can be found");
+
+        // consider in CI pipeline, receipts may not always fetch from peer node, we comment this assertaion:
+        // assert!(!receipts.is_empty(), "No transaction receipts found");
+
+        // once we fetch some transactions we need to verify their block number should match with our query block number
+        // and each receipt's transaction hash value should match with the query block's transactoins field correspondingly in order
+        for (i, receipt) in receipts.iter().enumerate() {
+            assert_eq!(
+                receipt.transaction_hash, block.transactions[i],
+                "Mismatch in transaction hash"
+            );
+            assert_eq!(
+                receipt.block_number, block.number,
+                "Mismatch in block number"
+            );
+        }
     }
 }
