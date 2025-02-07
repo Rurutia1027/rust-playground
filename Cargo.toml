@@ -5,7 +5,7 @@ members = [
     "tutorial-2",
     "tutorial-3",
     "tutorial-5"
-, "tutorial-6"]
+, "tutorial-6", "tutorial-7"]
 
 
 [profile.test]
