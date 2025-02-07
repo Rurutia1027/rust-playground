@@ -13,18 +13,14 @@ mod tests {
         let random_to_addr = random_uuid.to_string();
         let random_value: u16 = rng.gen();
 
-        Output::new(
-            random_to_addr.to_owned(),
-            random_value as u64,
-        )
+        Output::new(random_to_addr.to_owned(), random_value as u64)
     }
 
     #[test]
     fn test_transaction_create() {
         let inputs: Vec<Output> = vec![];
         let outputs: Vec<Output> = vec![];
-        let trans: Transaction =
-            Transaction::new(inputs, outputs);
+        let trans: Transaction = Transaction::new(inputs, outputs);
 
         println!("Transaction Debug Info: {:?}", trans);
 
@@ -37,10 +33,8 @@ mod tests {
 
         // then let continue verify the hash works as expected: that even though the
         // inputs & outputs vectors are empty, the hash() function will not throw any exception or errors
-        let mut hash = crypto_hash::digest(
-            crypto_hash::Algorithm::SHA256,
-            &bytes,
-        );
+        let mut hash =
+            crypto_hash::digest(crypto_hash::Algorithm::SHA256, &bytes);
 
         let trans_hash = trans.hash();
         assert_eq!(hash, trans_hash);
@@ -57,8 +51,7 @@ mod tests {
             inputs.push(input);
         }
 
-        let trans: Transaction =
-            Transaction::new(inputs, outputs);
+        let trans: Transaction = Transaction::new(inputs, outputs);
 
         let mut bytes: Vec<u8> = vec![];
 
@@ -114,8 +107,7 @@ mod tests {
             outputs.push(output);
         }
 
-        let trans: Transaction =
-            Transaction::new(inputs, outputs);
+        let trans: Transaction = Transaction::new(inputs, outputs);
 
         // continue our logic, create outsider bytes and hash
         // and compare the outer bytes & hash with the trans function return value

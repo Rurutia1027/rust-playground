@@ -2,14 +2,11 @@
 mod tests {
     use std::ptr::addr_eq;
 
-    use blockchain::{
-        hashtable::Hashtable, transactions::Output, u64_bytes,
-    };
+    use blockchain::{hashtable::Hashtable, transactions::Output, u64_bytes};
 
     #[test]
     fn test_output_creation() {
-        let output =
-            Output::new("target_address".to_owned(), 40);
+        let output = Output::new("target_address".to_owned(), 40);
 
         assert_eq!(output.to_addr, "target_address");
         assert_eq!(output.value, 40)
@@ -49,10 +46,8 @@ mod tests {
 
         // second, convert the byte array into hash by invoking the hash funciton which
         // is already implemented in trait of Hashtable
-        let hash_value = crypto_hash::digest(
-            crypto_hash::Algorithm::SHA256,
-            &bytes,
-        );
+        let hash_value =
+            crypto_hash::digest(crypto_hash::Algorithm::SHA256, &bytes);
 
         // third, assert those values equal to each other
         assert_eq!(hash_value, output.hash());
