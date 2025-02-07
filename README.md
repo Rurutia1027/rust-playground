@@ -40,7 +40,7 @@ A collection of Rust-based projects for learning, experimenting, and implementin
 **Focus:**
 This tutorial delves into **GraphNode**, a critical middleware layer for indexing and querying blockchain data, with a focus on Ethereum. We'll lean how Graph Node extract blockchain data, organize it into subgraphs, and store it in relational databases based on a user-defined schema. We also explore how to read and understand Graph Node source codes.
 
-### 5. [Tutorial 5: Advanced Rust Applications in Blockchain and APIs](./tutorial-3/)
+### 5. [Tutorial 5: Advanced Rust Applications in Blockchain and APIs](./tutorial-5/)
 
 **Focus:**
 Building a production-grade Rust application with real-world use cases, such as implementing a key-value store, managing configuraiton environments, integrating with Ethereum, and handling event-driven workflows. This tutorial showcases how to create a robust system that interacts with blockchain data and local databases.
@@ -60,12 +60,6 @@ Building a production-grade Rust application with real-world use cases, such as 
 - Code and examples are in the `tutorial-5` folder.
 - Contains implementations for KVStore, Database Operations, Ethereum event monitoring & handling, and API bindings.
 
-**Modules:**
-
-```rust
-todo!();
-```
-
 **Goals:**
 
 - Provide a clear path to building production-ready applications.
@@ -77,6 +71,38 @@ We referred to several amazing open-source repositories, listed below with brief
 
 - [eth-analysis-rs](https://github.com/ultrasoundmoney/eth-analysis-rs): A Rust-based toolkit for analyzing Ethereum blockchain data, including transaction tracing and state changes.
 - [mars](https://github.com/deepeth/mars): A service for querying and storing Ethereum data efficiently, providing a robust data pipeline for blockchain analysis.
+
+
+
+### 7. [Tutorial 7: ](./tutorial-7/)
+
+**Focus**: 
+- Methods for using streams and implementing iterators with generic support.
+- Implementing test cases for streams and custom iterators. 
+- Further exploration of popular third-party stream libraries, with executable test cases demostrating their usage. 
+
+**Key Features**:
+
+- Generic Stream Handling: Learn how to create, manipulate, and process generic data streams asynchronously in Rust. 
+- Custom Generic Iterators: Understand how to implement custom iterators with generics, leveraging Rust's iterator traits for lexible data types. 
+- Testing Streams and Iterators: Develop comprehensive test cases for both streams and iterators, ensuring robust and reliable data processing. 
+- Third-Party Libraries: Explore libraries like futures, tokio-stream, and others to enhance stream functionality and integrate with async tasks. 
+- Practical Applications: Hands-on examples of subscribing to external data sources, mocking data streams, and manipulating streamed data in real time. 
+
+
+### 8. [Tutorial 8: ](./tutorial-8/)
+**Focus**: 
+- Learning how to integrate and utilize the `Progress` struct from the `pit_wall` crate. 
+- Implementing real-time progress tracking in Rust applications. 
+- Creating custom progress indicators and handling progress updates efficiently. 
+
+**Key Features**: 
+- Integration with `pit_wall`:  Step-by-step guidance on adding and configuring the `pit_wall` crate in our Rust project(integrate with multi-threads, async, iterator and streams together).
+- Using `Progress` Struct: Detailed exploration of the `Progress` struct's capabilities, methods and customization options. 
+- Custom Progress Indicators: Learn to design and implment our own progress indicators tailored to specific tasks.
+- Real-Time Progress Tracking: Techniques to track and display progress in long-running tasks or asynchronous operations. 
+- Testing Progress Logic: Writing test cases to ensure accurate progress tracking and handling edge cases. 
+- Practical Examples: Implementing progress tracking in real-world scenarios, such as file downloads, data processing, and API requests.
 
 ---
 
