@@ -177,33 +177,32 @@ pub async fn get_eth_price(client: &reqwest::Client) -> Result<EthPrice> {
     })
 }
 
-// this function will return instance of EthPrice#usd(f64) which it's timestamp is the minute grain closet to the 
-// query timestamp value 
+// this function will return instance of EthPrice#usd(f64) which it's timestamp is the minute grain closet to the
+// query timestamp value
 pub async fn get_closest_price_by_minute(
     client: &reqwest::Client,
     target_minute_rounded: DateTime<Utc>,
-    max_distance: Duration 
+    max_distance: Duration,
 ) -> Option<f64> {
-    // create a timestamp query range by given target_minute_rounded timestamp value 
-    // and the unit of the query range's distance value 
-    let start = target_minute_rounded - max_distance; 
-    let end = target_minute_rounded + max_distance; 
-    
+    // create a timestamp query range by given target_minute_rounded timestamp value
+    // and the unit of the query range's distance value
+    let start = target_minute_rounded - max_distance;
+    let end = target_minute_rounded + max_distance;
+
     // fetch datasets via given query timestamp range: [start, end]
     let candles = get_eth_candles(client, start, end)
-        // waiting for response data vector asynchronously 
+        // waiting for response data vector asynchronously
         .await
-
         // if success Vec<EthPrice> will be unwrap via unwrap_or function
-        // otherwise, error happend unwrap_or will return a new Vector as return value 
-        .unwrap_or(Vec::new()); 
+        // otherwise, error happend unwrap_or will return a new Vector as return value
+        .unwrap_or(Vec::new());
 
     // here we check whether the return value is empty then return None
-    // otherwise invoke the find_closet_price function to handle the return value and wrap it via Some as return value 
+    // otherwise invoke the find_closet_price function to handle the return value and wrap it via Some as return value
     if (candles.is_empty()) {
-        None 
+        None
     } else {
-        let ret = find_closest_price(&candles, target_minute_rounded); 
+        let ret = find_closest_price(&candles, target_minute_rounded);
         Some(ret.usd)
     }
 }
@@ -266,11 +265,17 @@ mod tests {
     #[ignore = "failing in CI, caused by bybit API request limit"]
     #[tokio::test]
     async fn get_closest_price_by_minute_test() {
-        let client = &reqwest::Client::new(); 
-        let existing_plus_two = "2024-11-22T07:37:00Z".parse::<DateTime<Utc>>().unwrap();
-        let usd = get_closest_price_by_minute(client, existing_plus_two, Duration::minutes(2)).await;
-        println!("usd: {:?}", usd); 
-        assert!(usd > Some(0 as f64)); 
-        assert_eq!(usd, Some(3380.06)); 
+        let client = &reqwest::Client::new();
+        let existing_plus_two =
+            "2024-11-22T07:37:00Z".parse::<DateTime<Utc>>().unwrap();
+        let usd = get_closest_price_by_minute(
+            client,
+            existing_plus_two,
+            Duration::minutes(2),
+        )
+        .await;
+        println!("usd: {:?}", usd);
+        assert!(usd > Some(0 as f64));
+        assert_eq!(usd, Some(3380.06));
     }
 }

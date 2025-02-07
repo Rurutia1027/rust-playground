@@ -21,14 +21,7 @@ mod tests {
     fn test_block_creation() {
         // first, we need to init a series of transaction
         let trans = gen_random_transactions(9).unwrap();
-        let block = Block::new(
-            13,
-            0,
-            vec![0; 32],
-            trans,
-            0,
-            gen_difficulty(),
-        );
+        let block = Block::new(13, 0, vec![0; 32], trans, 0, gen_difficulty());
         assert_eq!(block.index, 13);
         assert_eq!(block.timestamp, 0);
         assert_eq!(block.hash, vec![0; 32]);
@@ -36,16 +29,8 @@ mod tests {
 
     #[test]
     fn test_block_bytes() {
-        let trans: Vec<Transaction> =
-            gen_random_transactions(10).unwrap();
-        let block = Block::new(
-            1,
-            1627836483,
-            vec![0; 32],
-            trans,
-            12345,
-            2,
-        );
+        let trans: Vec<Transaction> = gen_random_transactions(10).unwrap();
+        let block = Block::new(1, 1627836483, vec![0; 32], trans, 12345, 2);
         let bytes = block.bytes();
 
         // bytes is converted from
@@ -68,11 +53,9 @@ mod tests {
     #[test]
     fn test_block_hash() {
         // first first, create a Transaction vector
-        let trans: Vec<Transaction> =
-            gen_random_transactions(10).unwrap();
+        let trans: Vec<Transaction> = gen_random_transactions(10).unwrap();
         // first, create a new Block
-        let block =
-            Block::new(22, now(), vec![0; 32], trans, 1234, 3);
+        let block = Block::new(22, now(), vec![0; 32], trans, 1234, 3);
         let bytes = block.bytes();
 
         // because we now appand trans to block so modify this from '=' into '>'
@@ -81,10 +64,7 @@ mod tests {
         println!("hash value of the block is {:?}", hash_val);
 
         // and let's convert the Vec<u8> into hex
-        println!(
-            "hex hash value of the block is {:?}",
-            hex::encode(hash_val)
-        )
+        println!("hex hash value of the block is {:?}", hex::encode(hash_val))
     }
 
     fn gen_random_output() -> Result<Output> {
@@ -95,10 +75,8 @@ mod tests {
         // here we use u16 in case of all value accumulated overflow
         let random_value: u16 = rng.gen();
 
-        let ret = Ok(Output::new(
-            random_to_addr.to_owned(),
-            random_value as u64,
-        ));
+        let ret =
+            Ok(Output::new(random_to_addr.to_owned(), random_value as u64));
         ret
     }
 
@@ -120,27 +98,17 @@ mod tests {
         let input_cnt_random = rng.gen_range(1..=10);
         let output_cnt_random = rng.gen_range(1..=10);
 
-        let inputs =
-            gen_random_outputs(input_cnt_random).unwrap();
-        assert!(
-            inputs.len() > 0,
-            "inputs items generate failed!"
-        );
-        let outputs =
-            gen_random_outputs(output_cnt_random).unwrap();
-        assert!(
-            outputs.len() > 0,
-            "outputs items generate failed!"
-        );
+        let inputs = gen_random_outputs(input_cnt_random).unwrap();
+        assert!(inputs.len() > 0, "inputs items generate failed!");
+        let outputs = gen_random_outputs(output_cnt_random).unwrap();
+        assert!(outputs.len() > 0, "outputs items generate failed!");
 
         ret = Transaction::new(inputs, outputs);
 
         Ok(ret)
     }
 
-    fn gen_random_transactions(
-        cnt: u8,
-    ) -> Result<Vec<Transaction>> {
+    fn gen_random_transactions(cnt: u8) -> Result<Vec<Transaction>> {
         let mut ret: Vec<Transaction> = vec![];
 
         assert!(cnt > 0, "recv cnt value should be >= 0!");
@@ -157,19 +125,10 @@ mod tests {
     fn test_trans_in_block() {
         // create block with 21 transactions in it
         let trans = gen_random_transactions(21).unwrap();
-        assert!(
-            trans.len() == 21,
-            "trans count should be match!"
-        );
+        assert!(trans.len() == 21, "trans count should be match!");
 
-        let block = Block::new(
-            1,
-            now(),
-            vec![0; 32],
-            trans,
-            12345,
-            gen_difficulty(),
-        );
+        let block =
+            Block::new(1, now(), vec![0; 32], trans, 12345, gen_difficulty());
 
         // here we print inner debug info of the block we just created
         println!("Block info {:?}", block);

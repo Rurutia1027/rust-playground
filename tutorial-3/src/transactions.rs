@@ -1,9 +1,7 @@
 use std::collections::HashSet;
 use std::fmt::{self, Debug, Formatter};
 
-use crate::{
-    block::Block, hashtable::Hashtable, u64_bytes, Address, Hash,
-};
+use crate::{block::Block, hashtable::Hashtable, u64_bytes, Address, Hash};
 
 /*
 In a blockchain, a transaction represents a record of a state change, typically a transfer of value (liek cryptocurrency or tokens).
@@ -142,10 +140,7 @@ impl Transaction {
      * here we provide an implementaion of creating a new instance of the Transaction struct.
      * refering to the implemnetaiton of the new function that defined in the Block.
      */
-    pub fn new(
-        inputs: Vec<Output>,
-        outputs: Vec<Output>,
-    ) -> Self {
+    pub fn new(inputs: Vec<Output>, outputs: Vec<Output>) -> Self {
         Transaction { inputs, outputs }
     }
 
